@@ -208,7 +208,7 @@
       <button class="tab" data-v="rankings" onclick="go('rankings')">Rankings</button>
       <button class="tab" data-v="leaderboard" onclick="go('leaderboard')">Activity</button>
       <button class="tab" data-v="dash" onclick="go('dash')">My Tour</button>
-      <button class="tab" data-v="admin" onclick="go('admin')">Organiser</button>
+      <button class="tab tab-admin" data-v="admin" onclick="go('admin')">🔒 Organiser</button>
     </nav>
   </div>
 </header>
@@ -313,29 +313,38 @@
 <!-- ============ ORGANISER ============ -->
 <div class="view" id="view-admin">
   <section class="wrap">
-    <div class="shead"><h2>Organiser tools</h2><p>Create tournaments, approve entries and confirm scores. Works like a simple dashboard, no spreadsheets and no code.</p></div>
+    <div class="shead"><h2>Organiser tools</h2><p>Create tournaments, approve entries and see results as they come in. Works like a simple dashboard, no spreadsheets and no code.</p></div>
+    <div class="admin-banner">🔒 <div><b>Admin only.</b> This menu is visible to the organiser, not to players. It is shown here in the demo so you can see how you would run the tour. Players only see Home, Tournaments, Rankings, Activity and My Tour.</div></div>
     <div class="adm-grid">
       <div class="card pad">
         <h3 style="font-size:16px;margin-bottom:4px">Create a tournament</h3>
         <p style="font-size:13px;color:var(--muted);margin-bottom:15px">Publish it and the round-robin groups build themselves from who enters.</p>
         <form onsubmit="createTourney(event)">
-          <div class="field"><label>Name</label><input required placeholder="Challengers 200" /></div>
+          <div class="field"><label>Name</label><input name="ct_name" required placeholder="Challengers 200" /></div>
           <div class="two">
-            <div class="field"><label>Level</label><select><option>Juniors 75</option><option>Juniors 100</option><option>Futures 125</option><option>Futures 150</option><option selected>Challengers 175</option><option>Challengers 200</option><option>ATP/WTA 250</option><option>ATP/WTA 500</option><option>Masters 750</option><option>Masters 1000</option></select></div>
-            <div class="field"><label>Players</label><input type="number" value="4" /></div>
+            <div class="field"><label>Level</label><select name="ct_level"><option>Juniors 75</option><option>Juniors 100</option><option>Futures 125</option><option>Futures 150</option><option selected>Challengers 175</option><option>Challengers 200</option><option>ATP/WTA 250</option><option>ATP/WTA 500</option><option>Masters 750</option><option>Masters 1000</option></select></div>
+            <div class="field"><label>Players</label><input name="ct_players" type="number" value="4" /></div>
           </div>
           <div class="two">
-            <div class="field"><label>Entry deadline</label><input type="date" /></div>
-            <div class="field"><label>Start date</label><input type="date" /></div>
+            <div class="field"><label>Entry deadline</label><input name="ct_dl" type="date" /></div>
+            <div class="field"><label>Start date</label><input name="ct_start" type="date" /></div>
           </div>
           <button class="btn green" style="width:100%;justify-content:center" type="submit">Publish tournament</button>
         </form>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="card pad">
-          <h3 style="font-size:16px;margin-bottom:4px">Scores to confirm <span class="badge wait" id="conf-count"></span></h3>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Both players agreed, or resolve a dispute with one tap.</p>
+          <h3 style="font-size:16px;margin-bottom:4px">Match results <span class="badge confirm" id="conf-count"></span></h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Results appear here the moment a player reports them. Resolve any disputes with one tap.</p>
           <div id="adm-scores"></div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px">
+            <h3 style="font-size:16px">Tournament entries <span class="badge wait" id="ent-count"></span></h3>
+            <label class="switch"><input type="checkbox" id="approvalToggle" onchange="toggleApproval(this.checked)" /> require payment first</label>
+          </div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Players stay pending until you confirm their €15 payment. Approve to release their group and opponents’ contacts. Switch off to let players in automatically.</p>
+          <div id="adm-entries"></div>
         </div>
         <div class="card pad">
           <h3 style="font-size:16px;margin-bottom:4px">New registrations <span class="badge confirm" id="reg-count"></span></h3>
@@ -391,6 +400,21 @@
 .demo-links a{cursor:pointer;text-decoration:underline}
 .badge.arrange{background:#eef3ef;color:var(--muted)}
 .badge.dispute{background:#fdeaea;color:#c0392b}
+.tab-admin{color:#b8631b;border:1px dashed #e2c09a;margin-left:8px}
+.tab-admin:hover{background:#fbf2e7;color:#8a5a1a}
+.tab-admin.active{background:#7a4a12;color:#fff;border-style:solid;border-color:#7a4a12}
+.admin-banner{background:#fff7ec;border:1px solid #f0d9b5;color:#8a5a1a;border-radius:12px;padding:13px 16px;font-size:13.5px;margin-bottom:22px;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+.admin-banner b{color:#6b430f}
+.listrow.mine{background:#f3fbf6;box-shadow:inset 3px 0 0 var(--green);padding-left:10px}
+.oppview{background:#f7faf8;border:1px solid var(--line);border-radius:12px;padding:16px}
+.oppview-note{font-size:12px;font-weight:700;color:var(--clay)}
+.oppview-score{font-family:Sora;font-weight:800;font-size:18px;margin-top:4px}
+.lvltag.pend{background:#fff3e0;color:#b8631b}
+.pendbox{padding:18px 20px}
+.pendbox-h{font-weight:700;font-size:14.5px;color:#8a5a1a}
+.pendbox p{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.6}
+.switch{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;user-select:none}
+.switch input{accent-color:var(--green);width:15px;height:15px}
 </style>
 
 <script>
@@ -471,10 +495,10 @@ const OPPONENTS=[
 ];
 
 /* ============ persistent state ============ */
-const KEY="tot_demo_v2";
+const KEY="tot_demo_v3";
 let S=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],pts:0,w:0,l:0,act:0,played:0}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},requireApproval:true,pts:0,w:0,l:0,act:0,played:0}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -523,8 +547,9 @@ function submitReg(e){
 }
 
 /* ============ tournaments ============ */
+function findT(id){return (S.created||[]).find(x=>x.id===id)||TOURNEYS.find(x=>x.id===id)}
 function tcard(t){
-  const lvl=levelOf(t.name),num=numOf(t.name);
+  const lvl=t.lvl||levelOf(t.name),num=t.num||numOf(t.name);
   const entered=S.entries.includes(t.id);
   let action='';
   if(t.status==='up'){
@@ -552,13 +577,14 @@ function tcard(t){
     </div></div>`;
 }
 function renderT(){
-  document.getElementById('t-up').innerHTML=TOURNEYS.filter(t=>t.status==='up').map(tcard).join('');
+  const ups=[...(S.created||[]).filter(t=>t.status==='up'),...TOURNEYS.filter(t=>t.status==='up')];
+  document.getElementById('t-up').innerHTML=ups.map(tcard).join('');
   document.getElementById('t-on').innerHTML=TOURNEYS.filter(t=>t.status==='on').map(tcard).join('');
   document.getElementById('t-fin').innerHTML=TOURNEYS.filter(t=>t.status==='fin').map(tcard).join('');
-  document.getElementById('stat-open').textContent=TOURNEYS.filter(t=>t.status==='up').length;
+  document.getElementById('stat-open').textContent=ups.length;
 }
 function openEntry(id){
-  const t=TOURNEYS.find(x=>x.id===id),lvl=levelOf(t.name);
+  const t=findT(id),lvl=t.lvl||levelOf(t.name);
   if(!S.profile){
     openModal(`<div class="mh"><h3>Register first</h3><button class="x" onclick="closeModal()">×</button></div>
       <div class="mb"><p style="font-size:14px;color:var(--muted)">Create your free player profile, then you can enter ${t.name}.</p></div>
@@ -575,16 +601,18 @@ function openEntry(id){
       <div class="kv"><span>Entry deadline</span><b>${t.deadline}</b></div>
       <div class="kv"><span>Entry fee</span><b>€15 (Revolut / BOV)</b></div>
       <div class="kv"><span>Your level</span><b>${S.profile.level} ${ok?'✓ eligible':'⚠ outside range'}</b></div>
-      <p class="hint">${ok?'You will get your group and opponent contacts when the draw is made.':'This event is normally for '+eligibleLevels(lvl).join(', ')+'. You can still try it in the demo.'}</p>
+      <p class="hint">${ok?(S.requireApproval?'You pay €15 to the organiser, who approves your entry. Then your group and opponents’ contacts appear in My Tour.':'Your group and opponents’ contacts appear in My Tour once you enter.'):'This event is normally for '+eligibleLevels(lvl).join(', ')+'. You can still try it in the demo.'}</p>
     </div>
     <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button>
     <button class="btn green sm" onclick="doEnter('${t.id}')">Confirm entry</button></div>`);
 }
 function doEnter(id){
-  const t=TOURNEYS.find(x=>x.id===id);
+  const t=findT(id);
   if(!S.entries.includes(id)){
     S.entries.push(id);
-    // round-robin group of 4 = 3 opponents = 3 rounds
+    S.entryStatus=S.entryStatus||{};
+    S.entryStatus[id]=S.requireApproval?'pending':'approved';
+    // round-robin group of 4 = 3 opponents = 3 rounds (revealed once approved)
     const off=S.matches.length;
     for(let r=0;r<3;r++){
       const o=OPPONENTS[(off+r)%OPPONENTS.length];
@@ -593,11 +621,14 @@ function doEnter(id){
     save();
   }
   closeModal();renderAll();
-  toast(`Entered <b>${t.name}</b> &middot; check My Tour for your group`);
+  toast(S.requireApproval
+    ? `Entered <b>${t.name}</b> &middot; pending the organiser's approval after payment`
+    : `Entered <b>${t.name}</b> &middot; check My Tour for your group`);
 }
 function withdraw(id){
   S.entries=S.entries.filter(x=>x!==id);
   S.matches=S.matches.filter(m=>m.tid!==id);
+  if(S.entryStatus)delete S.entryStatus[id];
   save();renderAll();toast('Withdrawn from tournament');
 }
 
@@ -672,22 +703,31 @@ function renderDash(){
   b.innerHTML=profile+`<div style="margin-top:18px">${tours}</div>`;
 }
 function tourCard(id){
-  const t=TOURNEYS.find(x=>x.id===id); if(!t) return '';
-  const lvl=levelOf(t.name);
+  const t=findT(id); if(!t) return '';
+  const lvl=t.lvl||levelOf(t.name);
+  const status=(S.entryStatus&&S.entryStatus[id])||'approved';
   const rounds=S.matches.map((m,i)=>({m,i})).filter(x=>x.m.tid===id).sort((a,b)=>a.m.round-b.m.round);
-  const done=rounds.filter(x=>x.m.st==='confirmed').length;
-  return `<div class="card ttour">
-    <div class="ttour-head">
+  const done=rounds.filter(x=>x.m.st==='reported'||x.m.st==='confirmed').length;
+  const head=`<div class="ttour-head">
       <div>
-        <div class="ttour-name">${t.name} <span class="lvltag">${LEVEL_LABEL[lvl]}</span></div>
-        <div class="ttour-dates">${t.start}${t.end?' - '+t.end:''} &middot; 4-player round robin &middot; €15 paid &middot; ${done}/3 confirmed</div>
+        <div class="ttour-name">${t.name} <span class="lvltag">${LEVEL_LABEL[lvl]}</span>${status==='pending'?' <span class="lvltag pend">Pending approval</span>':''}</div>
+        <div class="ttour-dates">${t.start}${t.end?' - '+t.end:''} &middot; 4-player round robin &middot; ${status==='pending'?'€15 due':'€15 paid &middot; '+done+'/3 results in'}</div>
       </div>
       <button class="btn gray sm" onclick="withdraw('${id}')">Withdraw</button>
-    </div>
+    </div>`;
+  if(status==='pending'){
+    return `<div class="card ttour">${head}
+      <div class="pendbox">
+        <div class="pendbox-h">⏳ Waiting for the organiser to approve your entry</div>
+        <p>Pay the €15 entry to the organiser by Revolut or BOV Mobile (+356 79335554). As soon as they confirm your payment and approve you, your round-robin group and your opponents’ contact details appear right here.</p>
+      </div>
+    </div>`;
+  }
+  return `<div class="card ttour">${head}
     <details class="guide">
       <summary>How to organise your matches + rules</summary>
       <div class="guide-body">
-        <p>You are in a group of 4 and play each of the other 3 once, one match per week. Message each opponent using their contact details below to agree a day, time and court. Report the score here as soon as you finish, then your opponent confirms it and the organiser is notified.</p>
+        <p>You are in a group of 4 and play each of the other 3 once, one match per week. Message each opponent using their contact details below to agree a day, time and court. Report the score here as soon as you finish. Your opponent is notified and the organiser sees it straight away. If they disagree, they can dispute it.</p>
         <ul>
           <li>2 sets to 6 games. If you each win a set, play a match tiebreak to 10.</li>
           <li>You have 1 week to arrange and play each round.</li>
@@ -708,19 +748,15 @@ function roundRow(m,i){
   if(m.st==='arrange'){
     badge='<span class="badge arrange">To arrange</span>';
     action=`<button class="btn green sm" onclick="reportScore(${i})">Report result</button>`;
-  }else if(m.st==='reported'){
-    badge='<span class="badge wait">Awaiting '+first+'</span>';
-    action=`<button class="btn line sm" onclick="reportScore(${i})">Edit</button>`;
-    extra=`<div class="rscore">${m.won?'You won':'You lost'} ${m.score}</div>
-      <div class="demo-links">${first} notified by email &middot; organiser informed &middot; <a onclick="setStatus(${i},'confirmed')">demo: ${first} confirms</a> &middot; <a onclick="setStatus(${i},'disputed')">disputes</a></div>`;
-  }else if(m.st==='confirmed'){
-    badge='<span class="badge confirm">Confirmed</span>';
-    action=`<button class="btn line sm" onclick="reportScore(${i})">Edit</button>`;
-    extra=`<div class="rscore">${m.won?'You won':'You lost'} ${m.score} &middot; counted in your ranking</div>`;
   }else if(m.st==='disputed'){
     badge='<span class="badge dispute">Disputed</span>';
     action=`<button class="btn line sm" onclick="reportScore(${i})">Edit score</button>`;
-    extra=`<div class="rscore">${m.score}</div><div class="demo-links">${first} disputed the score &middot; organiser will resolve &middot; <a onclick="setStatus(${i},'confirmed')">demo: resolve</a></div>`;
+    extra=`<div class="rscore">${m.score}</div><div class="demo-links">${first} disputed this score &middot; organiser will resolve &middot; <a onclick="opponentView(${i})">see what ${first} sees</a></div>`;
+  }else{ // reported = recorded immediately
+    badge='<span class="badge confirm">Recorded</span>';
+    action=`<button class="btn line sm" onclick="reportScore(${i})">Edit</button>`;
+    extra=`<div class="rscore">${m.won?'You won':'You lost'} ${m.score} &middot; counted in your ranking</div>
+      <div class="demo-links">${first} notified &middot; organiser updated &middot; <a onclick="opponentView(${i})">see what ${first} sees</a> &middot; <a onclick="setStatus(${i},'disputed')">demo: ${first} disputes</a></div>`;
   }
   return `<div class="roundrow">
     <div class="rnd">R${m.round}</div>
@@ -763,31 +799,84 @@ function confirmReport(i){
   }else won=youSets>oppSets;
   m.score=score; m.won=won; m.st='reported';
   recompute(); save(); closeModal(); renderAll();
-  toast(`Result sent &middot; <b>${m.opp.split(' ')[0]}</b> notified to confirm, organiser informed`);
+  toast(`Result recorded &middot; <b>${m.opp.split(' ')[0]}</b> notified, organiser updated`);
 }
 function setStatus(i,st){
   const m=S.matches[i],first=m.opp.split(' ')[0];
   m.st=st; recompute(); save(); renderAll();
-  if(st==='confirmed')toast(`${first} confirmed &middot; result counted in your ranking`);
-  else if(st==='disputed')toast(`${first} disputed &middot; organiser will resolve`);
+  if(st==='disputed')toast(`${first} disputed &middot; organiser will resolve`);
+  else if(st==='reported')toast(`Dispute resolved &middot; result stands`);
+}
+function invertScore(s){return s.split(', ').map(p=>{const br=p.startsWith('[');const c=p.replace(/[\[\]]/g,'');const a=c.split('-');return (br?'[':'')+a[1]+'-'+a[0]+(br?']':'');}).join(', ')}
+function opponentView(i){
+  const m=S.matches[i],first=m.opp.split(' ')[0];
+  openModal(`<div class="mh"><h3>What ${first} sees</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="oppview">
+        <div class="oppview-note">🔔 New result reported</div>
+        <p style="font-size:13.5px;margin:9px 0 0">${meName()} reported your Round ${m.round} match in <b>${m.tname}</b>.</p>
+        <div class="oppview-score">${first} ${m.won?'lost':'won'} ${invertScore(m.score)}</div>
+        <p style="font-size:13px;color:var(--muted);margin-top:10px">This is recorded and the organiser has been notified. If it is wrong, ${first} can dispute it.</p>
+      </div>
+    </div>
+    <div class="mf"><button class="btn line sm" onclick="closeModal()">Looks right</button>
+    <button class="btn sm" style="background:#fdeaea;color:#c0392b" onclick="closeModal();setStatus(${i},'disputed')">Dispute</button></div>`);
 }
 
 /* ============ organiser ============ */
 let pendingRegs=[{n:"Chris Camilleri",f:"🇲🇹",info:"Challengers"},{n:"Aurora Bianchi",f:"🇮🇹",info:"Juniors"},{n:"Tom Becker",f:"🇩🇪",info:"Futures"}];
-let pendingScores=[{a:"D. Santos",b:"M. Borg",s:"6-3 4-6 7-5",info:"both players agree"},{a:"H. Vella",b:"O. Haddad",s:"disputed",info:"scores do not match"}];
+let pendingEntries=[{n:"Marco Borg",f:"🇲🇹",t:"Challengers 200"},{n:"Lena Fischer",f:"🇩🇪",t:"Juniors 75"}];
+function approveEntry(id){S.entryStatus=S.entryStatus||{};S.entryStatus[id]='approved';save();renderAll();toast('Entry approved &middot; player notified with their group and contacts')}
+function approveSampleEntry(n){pendingEntries=pendingEntries.filter(e=>e.n.replace(/'/g,'')!==n);renderAdmin();toast('Entry approved &middot; player notified')}
+function toggleApproval(on){S.requireApproval=on;save();renderAll();toast(on?'New entries now need your approval':'New entries are auto-approved')}
+let sampleResults=[
+  {a:"Sofia Ricci",b:"Liam O'Connor",score:"7-5, 6-4",t:"Masters 1000",st:"reported"},
+  {a:"Pierre Dubois",b:"Diego Santos",score:"6-4, 6-2",t:"Challengers 175",st:"reported"},
+  {a:"Hannah Vella",b:"Omar Haddad",score:"6-2, 3-6, [10-7]",t:"Futures 125",st:"disputed"},
+];
+function meName(){return S.profile?`${S.profile.first} ${S.profile.last}`:'You'}
 function renderAdmin(){
-  document.getElementById('adm-scores').innerHTML=pendingScores.map((s,i)=>`
-    <div class="listrow"><div class="info"><b>${s.a} vs ${s.b}</b><span>${s.s} &middot; ${s.info}</span></div>
-    <button class="btn green sm" onclick="admScore(${i})">${s.s==='disputed'?'Resolve':'Confirm'}</button></div>`).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">All caught up 🎉</p>';
+  const mine=[];
+  S.matches.forEach((m,idx)=>{if(m.st==='reported'||m.st==='disputed')mine.push({a:meName(),b:m.opp,score:m.score,t:m.tname,st:m.st,ref:idx,you:true})});
+  const all=[...mine,...sampleResults];
+  document.getElementById('adm-scores').innerHTML=all.map(r=>{
+    const badge=r.st==='disputed'?'<span class="badge dispute">Disputed</span>':'<span class="badge confirm">Recorded</span>';
+    const act=r.st==='disputed'?`<button class="btn green sm" onclick="${r.ref!=null?`setStatus(${r.ref},'reported')`:`resolveSample('${(r.a+'|'+r.b).replace(/'/g,'')}')`}">Resolve</button>`:'';
+    return `<div class="listrow ${r.you?'mine':''}"><div class="info"><b>${r.a} vs ${r.b}</b><span>${r.score} &middot; ${r.t}${r.you?' &middot; just reported':''}</span></div>${badge}${act}</div>`;
+  }).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No results yet</p>';
+  // tournament entries pending approval (player's own pending + samples)
+  const myPending=(S.entries||[]).filter(id=>(S.entryStatus||{})[id]==='pending').map(id=>({n:meName(),f:S.profile?FLAG[S.profile.country]:'🎾',t:(findT(id)||{}).name||'',ref:id,you:true}));
+  const ents=[...myPending,...pendingEntries];
+  document.getElementById('adm-entries').innerHTML=ents.map(en=>`
+    <div class="listrow ${en.you?'mine':''}"><span class="flag" style="font-size:20px">${en.f}</span>
+      <div class="info"><b>${en.n}</b><span>${en.t} &middot; €15 ${en.you?'due':'unpaid'}${en.you?' &middot; just entered':''}</span></div>
+      <button class="btn green sm" onclick="${en.ref!=null?`approveEntry('${en.ref}')`:`approveSampleEntry('${en.n.replace(/'/g,'')}')`}">Approve</button></div>`).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No entries waiting</p>';
+  document.getElementById('ent-count').textContent=ents.length+' pending';
+  const at=document.getElementById('approvalToggle'); if(at)at.checked=!!S.requireApproval;
   document.getElementById('adm-regs').innerHTML=pendingRegs.map((r,i)=>`
     <div class="listrow"><span class="flag" style="font-size:20px">${r.f}</span><div class="info"><b>${r.n}</b><span>wants ${r.info}</span></div>
     <button class="btn green sm" onclick="admReg(${i})">Approve</button></div>`).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No new sign-ups</p>';
-  document.getElementById('conf-count').textContent=pendingScores.length+' pending';
+  const disputes=all.filter(r=>r.st==='disputed').length;
+  const cc=document.getElementById('conf-count');
+  cc.textContent=disputes?`${disputes} to resolve`:`${all.length} results`;
+  cc.className='badge '+(disputes?'dispute':'confirm');
   document.getElementById('reg-count').textContent=pendingRegs.length+' new';
 }
-function admScore(i){pendingScores.splice(i,1);renderAdmin();toast('Score confirmed &middot; rankings updated')}
+function resolveSample(key){sampleResults=sampleResults.map(r=>((r.a+'|'+r.b).replace(/'/g,'')===key?{...r,st:'reported'}:r));renderAdmin();toast('Dispute resolved &middot; result stands')}
 function admReg(i){const r=pendingRegs[i];pendingRegs.splice(i,1);renderAdmin();toast('<b>'+r.n+'</b> approved')}
-function createTourney(e){e.preventDefault();e.target.reset();toast('Tournament published &middot; players notified')}
+function createTourney(e){
+  e.preventDefault();
+  const f=e.target, lvlSel=f.ct_level.value;
+  const name=(f.ct_name.value||'').trim()||lvlSel;
+  const players=parseInt(f.ct_players.value,10)||4;
+  const created=S.created||(S.created=[]);
+  const t={id:'c'+(created.length+1),name,lvl:levelOf(lvlSel),num:numOf(lvlSel),
+    status:'up',deadline:fmtDate(f.ct_dl.value)||'TBC',start:fmtDate(f.ct_start.value)||'TBC',end:'',spots:'0 / '+players};
+  created.unshift(t); save();
+  f.reset(); renderAll(); go('tournaments');
+  toast(`<b>${t.name}</b> published &middot; now open for entry`);
+}
+function fmtDate(iso){if(!iso)return '';const d=new Date(iso+'T00:00');if(isNaN(d.getTime()))return '';const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]}
 
 /* ============ modal + toast ============ */
 function openModal(h){document.getElementById('modal').innerHTML=h;document.getElementById('overlay').classList.add('show')}
