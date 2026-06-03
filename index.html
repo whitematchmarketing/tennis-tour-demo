@@ -206,6 +206,7 @@
       <button class="tab active" data-v="home" onclick="go('home')">Home</button>
       <button class="tab" data-v="tournaments" onclick="go('tournaments')">Tournaments</button>
       <button class="tab" data-v="rankings" onclick="go('rankings')">Rankings</button>
+      <button class="tab" data-v="results" onclick="go('results')">Results</button>
       <button class="tab" data-v="leaderboard" onclick="go('leaderboard')">Activity</button>
       <button class="tab" data-v="dash" onclick="go('dash')">My Tour</button>
       <button class="tab tab-admin" data-v="admin" onclick="go('admin')">🔒 Organiser</button>
@@ -289,6 +290,17 @@
   </section>
 </div>
 
+<!-- ============ RESULTS ============ -->
+<div class="view" id="view-results">
+  <section class="wrap">
+    <div class="shead"><h2>Latest results</h2><p>Every completed match across the tour, newest first. Tap a match for the head-to-head and the opponent’s fair-play review.</p></div>
+    <div class="champrow"><div class="champrow-h">🏆 Recent champions</div><div class="champs" id="champs"></div></div>
+    <div class="rtabs" id="restabs"></div>
+    <div id="resfeed"></div>
+    <div style="text-align:center;margin-top:20px"><button class="btn line sm" onclick="toast('In the live version this loads older matches')">Load older matches</button></div>
+  </section>
+</div>
+
 <!-- ============ ACTIVITY LEADERBOARD ============ -->
 <div class="view" id="view-leaderboard">
   <section class="wrap">
@@ -358,7 +370,7 @@
 
 <footer><div class="wrap">
   <div class="ftcol"><b>🎾 Tennis Online Tour</b><div style="margin-top:6px">Connect. Compete. Conquer.</div></div>
-  <div class="ftcol"><b>Play</b><a onclick="go('tournaments')">Tournaments</a><a onclick="go('rankings')">Rankings</a><a onclick="go('leaderboard')">Activity leaderboard</a></div>
+  <div class="ftcol"><b>Play</b><a onclick="go('tournaments')">Tournaments</a><a onclick="go('rankings')">Rankings</a><a onclick="go('results')">Results</a><a onclick="go('leaderboard')">Activity leaderboard</a></div>
   <div class="ftcol"><b>Contact</b><a href="mailto:delicatatennis@gmail.com">delicatatennis@gmail.com</a><a>(+356) 79335554</a><div style="margin-top:6px">New tournaments every Saturday</div></div>
 </div></footer>
 
@@ -415,6 +427,35 @@
 .pendbox p{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.6}
 .switch{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;user-select:none}
 .switch input{accent-color:var(--green);width:15px;height:15px}
+.champrow{margin-bottom:20px}
+.champrow-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:10px}
+.champs{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.champ{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow);flex-shrink:0}
+.cup{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:15px}
+.champ-i{display:flex;flex-direction:column;line-height:1.25}
+.champ-i b{font-size:13.5px;white-space:nowrap}
+.champ-i span{font-size:11.5px;color:var(--muted)}
+.rescard{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:12px;cursor:pointer;transition:.12s}
+.rescard:hover{border-color:#c7d2cb;transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.res-top{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:9px}
+.res-tour{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--ink)}
+.tdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pl{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:14.5px}
+.pl .flag{font-size:17px}
+.pl b{font-weight:700}
+.setline{margin-left:auto;display:flex;gap:12px;font-variant-numeric:tabular-nums;font-weight:700}
+.pl:not(.winner) .setline{color:var(--muted);font-weight:600}
+.setline span{width:14px;text-align:center}
+.wtick{color:var(--green);font-weight:800;width:14px;text-align:center;font-size:13px}
+.pl:not(.winner) .wtick{visibility:hidden}
+.res-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.reacts{display:flex;gap:12px;align-items:center}
+.reacts a{cursor:pointer}
+.reacts a:hover{color:var(--ink)}
+.review{background:#f7faf8;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px}
+.review-h{font-size:12px;font-weight:700;color:var(--clay)}
+.review p{font-size:14px;font-style:italic;margin:8px 0 6px;line-height:1.5}
+.review-by{font-size:12.5px;color:var(--muted)}
 </style>
 
 <script>
@@ -498,7 +539,7 @@ const OPPONENTS=[
 const KEY="tot_demo_v3";
 let S=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},requireApproval:true,pts:0,w:0,l:0,act:0,played:0}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},requireApproval:true,regApproved:false,pts:0,w:0,l:0,act:0,played:0}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -516,9 +557,10 @@ function scrollToReg(){setTimeout(()=>document.getElementById('regblock').scroll
 function renderReg(){
   const c=document.getElementById('regcard');
   if(S.profile){
-    c.innerHTML=`<div class="ok"><div class="big">✓</div>
-      <h3 style="font-size:20px">You're registered, ${S.profile.first}!</h3>
-      <p style="color:var(--muted);font-size:14px;margin:8px 0 18px">Your profile is live at <b>${S.profile.level}</b> level and your ranking history has started.</p>
+    const pend=!S.regApproved;
+    c.innerHTML=`<div class="ok"><div class="big">${pend?'⏳':'✓'}</div>
+      <h3 style="font-size:20px">${pend?`Thanks, ${S.profile.first}!`:`You're approved, ${S.profile.first}!`}</h3>
+      <p style="color:var(--muted);font-size:14px;margin:8px 0 18px">${pend?`Your registration is in and the organiser will approve it shortly. You can already browse and enter tournaments at <b>${S.profile.level}</b> level.`:`Your profile is live at <b>${S.profile.level}</b> level and your ranking history has started.`}</p>
       <button class="btn green" onclick="go('tournaments')">Enter a tournament →</button></div>`;
     return;
   }
@@ -542,8 +584,9 @@ function submitReg(e){
   e.preventDefault();
   S.profile={first:rf.value.trim(),last:rl.value.trim(),email:re.value,phone:rp.value,
     country:rc.value,level:rlvl.value.split(' (')[0]};
+  S.regApproved=false; // appears in the organiser's New registrations queue
   save();renderAll();
-  toast('Profile created &middot; welcome to the tour!');
+  toast('Registration sent &middot; pending the organiser’s approval');
 }
 
 /* ============ tournaments ============ */
@@ -661,6 +704,49 @@ function renderLeaderboard(){
     <td class="rk ${i<3?'g':''}">${i+1}</td>
     <td><span class="pname"><span class="flag">${p.f}</span>${p.n}${p.me?'<span class="you-tag">YOU</span>':''}</span></td>
     <td>${p.m}</td><td style="font-size:16px">${p.b}</td><td class="pts">${p.a}</td></tr>`).join('');
+}
+
+/* ============ results feed ============ */
+const TIER_COLOR={Juniors:'#3f8f4f',Futures:'#d8632e',Challengers:'#0d5c3a','ATP/WTA':'#1f86c4',Masters:'#3a4b78'};
+const RESULTS=[
+  {tour:"ATP/WTA 500",tier:"ATP/WTA",round:"Final",date:"17 May",p1:{n:"Liam O'Connor",f:"🇬🇧"},p2:{n:"Pierre Dubois",f:"🇫🇷"},sets:[[7,6],[3,6],[7,5]],h2h:[3,2],up:21,wow:4,review:"Match of the season. Three sets of brilliant tennis and great spirit."},
+  {tour:"Masters 750",tier:"Masters",round:"Final",date:"17 May",p1:{n:"Sofia Ricci",f:"🇮🇹"},p2:{n:"Liam O'Connor",f:"🇬🇧"},sets:[[7,5],[6,4]],h2h:[4,3],up:18,wow:2,review:"Top match, fair line calls and a brutal forehand. Always a pleasure."},
+  {tour:"Futures 150",tier:"Futures",round:"Final",date:"31 May",p1:{n:"Hannah Vella",f:"🇲🇹"},p2:{n:"Diego Santos",f:"🇪🇸"},sets:[[7,6],[6,4]],h2h:[1,1],up:11,wow:3,review:"Tight first-set tiebreak decided it. Friendly, sporting match."},
+  {tour:"Challengers 200",tier:"Challengers",round:"Final",date:"10 May",p1:{n:"Pierre Dubois",f:"🇫🇷"},p2:{n:"Alessandro Conti",f:"🇮🇹"},sets:[[6,3],[4,6],[10,7]],h2h:[2,2],up:14,wow:1,review:"Great fight, went to a deciding match tiebreak. Super sporting."},
+  {tour:"Juniors 100",tier:"Juniors",round:"Final",date:"03 May",p1:{n:"Lena Fischer",f:"🇩🇪"},p2:{n:"Yuki Tanaka",f:"🇯🇵"},sets:[[6,4],[3,6],[10,8]],h2h:[2,1],up:7,wow:2,review:"What a decider. Both have a bright future, lovely to play."},
+  {tour:"ATP/WTA 250",tier:"ATP/WTA",round:"Semi-final",date:"15 May",p1:{n:"Sofia Ricci",f:"🇮🇹"},p2:{n:"Hannah Vella",f:"🇲🇹"},sets:[[6,2],[6,3]],h2h:[3,0],up:9,wow:0,review:"Clinical from Sofia. Hannah fought hard in the second set."},
+  {tour:"Challengers 175",tier:"Challengers",round:"Quarter-final",date:"10 May",p1:{n:"Alessandro Conti",f:"🇮🇹"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,1],[6,2]],h2h:[1,0],up:5,wow:0,review:"Strong serving day. Omar never stopped competing."},
+  {tour:"Futures 125",tier:"Futures",round:"Semi-final",date:"31 May",p1:{n:"Diego Santos",f:"🇪🇸"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,4],[6,4]],h2h:[2,1],up:6,wow:1,review:"Solid baseline battle, great sportsmanship throughout."},
+];
+let resTier="All";
+function setline(sets,who){return sets.map(s=>`<span>${s[who]}</span>`).join('')}
+function renderResults(){
+  document.getElementById('champs').innerHTML=RESULTS.filter(m=>m.round==='Final').map(m=>`<div class="champ"><div class="cup" style="background:${TIER_COLOR[m.tier]}">🏆</div><div class="champ-i"><b>${m.p1.f} ${m.p1.n}</b><span>${m.tour}</span></div></div>`).join('');
+  document.getElementById('restabs').innerHTML=["All",...LEVELS].map(t=>`<button class="rtab ${t===resTier?'active':''}" onclick="resTier='${t}';renderResults()">${t}</button>`).join('');
+  const list=RESULTS.map((m,i)=>({m,i})).filter(x=>resTier==='All'||x.m.tier===resTier);
+  document.getElementById('resfeed').innerHTML=list.map(x=>resCard(x.m,x.i)).join('')||'<p style="color:var(--muted);padding:14px 0">No results in this category yet.</p>';
+}
+function resCard(m,i){
+  return `<div class="rescard" onclick="matchDetail(${i})">
+    <div class="res-top"><span class="res-tour"><span class="tdot" style="background:${TIER_COLOR[m.tier]}"></span>${m.tour} &middot; ${m.round}</span><span class="res-date">${m.date}</span></div>
+    <div class="pl winner"><span class="flag">${m.p1.f}</span><b>${m.p1.n}</b><span class="setline">${setline(m.sets,0)}</span><span class="wtick">✓</span></div>
+    <div class="pl"><span class="flag">${m.p2.f}</span><span>${m.p2.n}</span><span class="setline">${setline(m.sets,1)}</span><span class="wtick">✓</span></div>
+    <div class="res-foot"><span class="h2h">Head-to-head ${m.h2h[0]}-${m.h2h[1]}</span>
+      <span class="reacts"><a onclick="reactUp(${i},event)">👍 ${m.up}</a><span>😮 ${m.wow}</span></span></div>
+  </div>`;
+}
+function reactUp(i,e){e.stopPropagation();RESULTS[i].up++;renderResults()}
+function matchDetail(i){
+  const m=RESULTS[i],score=m.sets.map(s=>s[0]+'-'+s[1]).join(', ');
+  openModal(`<div class="mh"><h3>${m.tour} &middot; ${m.round}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="pl winner" style="padding:7px 0"><span class="flag">${m.p1.f}</span><b>${m.p1.n}</b><span class="setline">${setline(m.sets,0)}</span><span class="wtick">✓</span></div>
+      <div class="pl" style="padding:7px 0"><span class="flag">${m.p2.f}</span><span>${m.p2.n}</span><span class="setline">${setline(m.sets,1)}</span><span class="wtick">✓</span></div>
+      <div class="kv" style="margin-top:12px"><span>Final score</span><b>${score}</b></div>
+      <div class="kv"><span>Head-to-head</span><b>${m.p1.n.split(' ')[0]} ${m.h2h[0]} - ${m.h2h[1]} ${m.p2.n.split(' ')[0]}</b></div>
+      <div class="review"><div class="review-h">⭐ Opponent review &middot; fair play</div><p>“${m.review}”</p><div class="review-by">— ${m.p2.n}</div></div>
+    </div>
+    <div class="mf"><span class="reacts" style="margin-right:auto;color:var(--muted);font-size:13px"><a onclick="reactUp(${i},event);closeModal()">👍 ${m.up}</a> &middot; 😮 ${m.wow}</span><button class="btn green sm" onclick="closeModal()">Close</button></div>`);
 }
 
 /* ============ my tour ============ */
@@ -853,17 +939,18 @@ function renderAdmin(){
       <button class="btn green sm" onclick="${en.ref!=null?`approveEntry('${en.ref}')`:`approveSampleEntry('${en.n.replace(/'/g,'')}')`}">Approve</button></div>`).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No entries waiting</p>';
   document.getElementById('ent-count').textContent=ents.length+' pending';
   const at=document.getElementById('approvalToggle'); if(at)at.checked=!!S.requireApproval;
-  document.getElementById('adm-regs').innerHTML=pendingRegs.map((r,i)=>`
-    <div class="listrow"><span class="flag" style="font-size:20px">${r.f}</span><div class="info"><b>${r.n}</b><span>wants ${r.info}</span></div>
-    <button class="btn green sm" onclick="admReg(${i})">Approve</button></div>`).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No new sign-ups</p>';
+  const myReg=(S.profile&&!S.regApproved)?`<div class="listrow mine"><span class="flag" style="font-size:20px">${FLAG[S.profile.country]}</span><div class="info"><b>${meName()}</b><span>wants ${S.profile.level} &middot; just registered</span></div><button class="btn green sm" onclick="approveMyReg()">Approve</button></div>`:'';
+  const regsHtml=pendingRegs.map((r,i)=>`<div class="listrow"><span class="flag" style="font-size:20px">${r.f}</span><div class="info"><b>${r.n}</b><span>wants ${r.info}</span></div><button class="btn green sm" onclick="admReg(${i})">Approve</button></div>`).join('');
+  document.getElementById('adm-regs').innerHTML=(myReg+regsHtml)||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No new sign-ups</p>';
   const disputes=all.filter(r=>r.st==='disputed').length;
   const cc=document.getElementById('conf-count');
   cc.textContent=disputes?`${disputes} to resolve`:`${all.length} results`;
   cc.className='badge '+(disputes?'dispute':'confirm');
-  document.getElementById('reg-count').textContent=pendingRegs.length+' new';
+  document.getElementById('reg-count').textContent=(pendingRegs.length+(myReg?1:0))+' new';
 }
 function resolveSample(key){sampleResults=sampleResults.map(r=>((r.a+'|'+r.b).replace(/'/g,'')===key?{...r,st:'reported'}:r));renderAdmin();toast('Dispute resolved &middot; result stands')}
 function admReg(i){const r=pendingRegs[i];pendingRegs.splice(i,1);renderAdmin();toast('<b>'+r.n+'</b> approved')}
+function approveMyReg(){S.regApproved=true;save();renderAll();toast('<b>'+meName()+'</b> approved &middot; player can now enter tournaments')}
 function createTourney(e){
   e.preventDefault();
   const f=e.target, lvlSel=f.ct_level.value;
@@ -885,7 +972,7 @@ document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==
 let tt;function toast(m){const t=document.getElementById('toast');t.innerHTML='🎾 '+m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800)}
 
 /* ============ init ============ */
-function renderAll(){renderReg();renderT();renderRtabs();renderRanks();renderLeaderboard();renderDash();renderAdmin()}
+function renderAll(){renderReg();renderT();renderRtabs();renderRanks();renderResults();renderLeaderboard();renderDash();renderAdmin()}
 renderAll();
 </script>
 </body>
