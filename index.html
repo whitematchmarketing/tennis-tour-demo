@@ -356,7 +356,42 @@
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 
-<style>.ghead{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;font-family:Inter;font-weight:700}</style>
+<style>
+.ghead{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;font-family:Inter;font-weight:700}
+.me.mebanner{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.me.mebanner .meinfo{flex:1;min-width:150px}
+.me.mebanner .av{margin:0}
+.me.mebanner h3{margin-top:0}
+.me.mebanner .row3{margin:0}
+.ttour{padding:0;overflow:hidden;margin-bottom:16px}
+.ttour-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px;background:#f8faf8;border-bottom:1px solid var(--line)}
+.ttour-name{font-family:Sora;font-weight:800;font-size:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.lvltag{font-family:Inter;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--green);background:#eaf5ee;padding:3px 8px;border-radius:6px}
+.ttour-dates{font-size:13px;color:var(--muted);margin-top:4px}
+.guide{border-bottom:1px solid var(--line)}
+.guide summary{cursor:pointer;padding:13px 20px;font-size:13.5px;font-weight:600;color:var(--green);list-style:none;user-select:none}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary::before{content:"▸  "}
+.guide[open] summary::before{content:"▾  "}
+.guide-body{padding:0 20px 16px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.guide-body ul{margin:9px 0 0 16px}
+.guide-body li{margin:4px 0}
+.rounds{padding:6px 20px 14px}
+.rounds-h{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;padding:9px 0 2px}
+.roundrow{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:15px 0;border-bottom:1px solid var(--line)}
+.roundrow:last-child{border-bottom:0}
+.rnd{width:42px;height:42px;border-radius:11px;background:#eef6f0;color:var(--green);font-family:Sora;font-weight:800;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.oppinfo{flex:1;min-width:150px}
+.oppname{font-weight:600;display:flex;align-items:center;gap:7px}
+.oppcontact{font-size:12.5px;color:var(--muted);margin-top:3px;display:flex;gap:14px;flex-wrap:wrap}
+.oppcontact a{color:var(--green);font-weight:500}
+.rextra{flex-basis:100%;padding-left:55px}
+.rscore{font-size:13px;color:var(--ink);font-weight:600;margin-top:2px}
+.demo-links{font-size:11.5px;color:var(--muted);margin-top:3px}
+.demo-links a{cursor:pointer;text-decoration:underline}
+.badge.arrange{background:#eef3ef;color:var(--muted)}
+.badge.dispute{background:#fdeaea;color:#c0392b}
+</style>
 
 <script>
 /* ============ levels & helpers ============ */
@@ -426,7 +461,14 @@ const SAMPLE_ACTIVITY=[
   {n:"Omar Haddad",f:"🇲🇹",m:22,b:"🔥",a:440},
   {n:"Lena Fischer",f:"🇩🇪",m:18,b:"⚡",a:360},
 ];
-const SAMPLE_OPP=[["Diego Santos","🇪🇸"],["Pierre Dubois","🇫🇷"],["Hannah Vella","🇲🇹"],["Omar Haddad","🇲🇹"],["Lena Fischer","🇩🇪"],["Marco Borg","🇲🇹"]];
+const OPPONENTS=[
+  {n:"Diego Santos",f:"🇪🇸",email:"diego.santos@email.com",phone:"+34 612 445 778"},
+  {n:"Pierre Dubois",f:"🇫🇷",email:"p.dubois@email.com",phone:"+33 6 12 34 56 78"},
+  {n:"Hannah Vella",f:"🇲🇹",email:"hannah.vella@email.com",phone:"+356 7945 1122"},
+  {n:"Omar Haddad",f:"🇲🇹",email:"omar.haddad@email.com",phone:"+356 7733 9080"},
+  {n:"Lena Fischer",f:"🇩🇪",email:"lena.fischer@email.com",phone:"+49 151 234 5678"},
+  {n:"Marco Borg",f:"🇲🇹",email:"marco.borg@email.com",phone:"+356 7912 3456"},
+];
 
 /* ============ persistent state ============ */
 const KEY="tot_demo_v2";
@@ -542,12 +584,16 @@ function doEnter(id){
   const t=TOURNEYS.find(x=>x.id===id);
   if(!S.entries.includes(id)){
     S.entries.push(id);
-    const opp=SAMPLE_OPP[S.matches.length%SAMPLE_OPP.length];
-    S.matches.push({tid:id,tname:t.name,opp:opp[0],f:opp[1],st:"report",when:"Round 1 &middot; play and report by "+t.start});
+    // round-robin group of 4 = 3 opponents = 3 rounds
+    const off=S.matches.length;
+    for(let r=0;r<3;r++){
+      const o=OPPONENTS[(off+r)%OPPONENTS.length];
+      S.matches.push({tid:id,tname:t.name,round:r+1,opp:o.n,f:o.f,email:o.email,phone:o.phone,st:"arrange",score:"",won:false});
+    }
     save();
   }
   closeModal();renderAll();
-  toast(`Entered <b>${t.name}</b> &middot; good luck!`);
+  toast(`Entered <b>${t.name}</b> &middot; check My Tour for your group`);
 }
 function withdraw(id){
   S.entries=S.entries.filter(x=>x!==id);
@@ -587,6 +633,13 @@ function renderLeaderboard(){
 }
 
 /* ============ my tour ============ */
+function recompute(){
+  let pts=0,w=0,l=0,played=0;
+  S.matches.forEach(m=>{
+    if(m.st==='reported'||m.st==='confirmed'){played++; if(m.won){pts+=winPts(m.tname);w++;}else{l++;}}
+  });
+  S.pts=pts;S.w=w;S.l=l;S.played=played;S.act=played*20;
+}
 function renderDash(){
   const b=document.getElementById('dash-body');
   if(!S.profile){
@@ -596,51 +649,94 @@ function renderDash(){
       <button class="btn green" onclick="go('home');scrollToReg()">Register to play →</button></div></div>`;
     return;
   }
-  const me=allPlayers().sort((a,b)=>b.p-a.p);
-  const rank=me.findIndex(p=>p.me)+1;
-  const init=(S.profile.first[0]||'')+(S.profile.last[0]||'');
-  const myT=S.entries.map(id=>TOURNEYS.find(t=>t.id===id)).filter(Boolean);
-  b.innerHTML=`<div class="dash-top">
-    <div class="me">
-      <div class="av">${init.toUpperCase()}</div>
+  const rank=allPlayers().sort((a,b)=>b.p-a.p).findIndex(p=>p.me)+1;
+  const init=((S.profile.first[0]||'')+(S.profile.last[0]||'')).toUpperCase();
+  const profile=`<div class="me mebanner">
+    <div class="av">${init}</div>
+    <div class="meinfo">
       <h3>${S.profile.first} ${S.profile.last} ${FLAG[S.profile.country]}</h3>
       <div class="sub">${S.profile.level} (${LEVEL_LABEL[S.profile.level]})</div>
-      <div class="row3">
-        <div><div class="n">#${rank}</div><div class="l">Rank</div></div>
-        <div><div class="n">${S.pts}</div><div class="l">Points</div></div>
-        <div><div class="n">${S.w}-${S.l}</div><div class="l">Win-Loss</div></div>
-      </div>
     </div>
-    <div class="card pad">
-      <h3 style="font-size:16px;margin-bottom:12px">My matches</h3>
-      <div id="matches"></div>
+    <div class="row3">
+      <div><div class="n">#${rank}</div><div class="l">Rank</div></div>
+      <div><div class="n">${S.pts}</div><div class="l">Points</div></div>
+      <div><div class="n">${S.w}-${S.l}</div><div class="l">Win-Loss</div></div>
     </div>
-  </div>
-  <div class="card pad" style="margin-top:16px">
-    <h3 style="font-size:16px;margin-bottom:4px">My tournaments</h3>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">${myT.length?'You are entered in '+myT.length+' event(s).':'You have not entered any tournaments yet.'}</p>
-    ${myT.length?myT.map(t=>`<div class="listrow"><div class="info"><b>${t.name}</b><span>Starts ${t.start} &middot; €15 paid</span></div><button class="btn gray sm" onclick="withdraw('${t.id}')">Withdraw</button></div>`).join(''):`<button class="btn green sm" onclick="go('tournaments')">Browse tournaments →</button>`}
   </div>`;
-  renderMatches();
+  const tours=S.entries.length
+    ? S.entries.map(tourCard).join('')
+    : `<div class="card"><div class="empty"><div class="em">🎾</div>
+        <h3 style="margin-bottom:6px">You have not entered a tournament yet</h3>
+        <p style="margin-bottom:16px">Enter one to get your round-robin group, opponents and contact details.</p>
+        <button class="btn green" onclick="go('tournaments')">Browse tournaments →</button></div></div>`;
+  b.innerHTML=profile+`<div style="margin-top:18px">${tours}</div>`;
 }
-function renderMatches(){
-  const el=document.getElementById('matches');if(!el)return;
-  if(!S.matches.length){el.innerHTML=`<p style="font-size:13.5px;color:var(--muted);padding:6px 0">No matches yet. Enter a tournament to get your first match.</p>`;return}
-  el.innerHTML=S.matches.map((m,i)=>{
-    let a='';
-    if(m.st==='report')a=`<button class="btn green sm" onclick="reportScore(${i})">Report score</button>`;
-    else if(m.st==='wait')a=`<span class="badge wait">Awaiting opponent</span>`;
-    else a=`<span class="badge confirm">Confirmed</span>`;
-    return `<div class="match"><span class="flag" style="font-size:20px">${m.f}</span>
-      <div class="vs"><div class="opp">vs ${m.opp} <span style="color:var(--muted);font-weight:500;font-size:12px">&middot; ${m.tname}</span></div>
-      <div class="when">${m.when}</div></div>${a}</div>`;
-  }).join('');
+function tourCard(id){
+  const t=TOURNEYS.find(x=>x.id===id); if(!t) return '';
+  const lvl=levelOf(t.name);
+  const rounds=S.matches.map((m,i)=>({m,i})).filter(x=>x.m.tid===id).sort((a,b)=>a.m.round-b.m.round);
+  const done=rounds.filter(x=>x.m.st==='confirmed').length;
+  return `<div class="card ttour">
+    <div class="ttour-head">
+      <div>
+        <div class="ttour-name">${t.name} <span class="lvltag">${LEVEL_LABEL[lvl]}</span></div>
+        <div class="ttour-dates">${t.start}${t.end?' - '+t.end:''} &middot; 4-player round robin &middot; €15 paid &middot; ${done}/3 confirmed</div>
+      </div>
+      <button class="btn gray sm" onclick="withdraw('${id}')">Withdraw</button>
+    </div>
+    <details class="guide">
+      <summary>How to organise your matches + rules</summary>
+      <div class="guide-body">
+        <p>You are in a group of 4 and play each of the other 3 once, one match per week. Message each opponent using their contact details below to agree a day, time and court. Report the score here as soon as you finish, then your opponent confirms it and the organiser is notified.</p>
+        <ul>
+          <li>2 sets to 6 games. If you each win a set, play a match tiebreak to 10.</li>
+          <li>You have 1 week to arrange and play each round.</li>
+          <li>No-show or no contact gives a technical loss. 3 strikes is a 3-week ban.</li>
+          <li>If neither player arranges the match, both lose.</li>
+        </ul>
+      </div>
+    </details>
+    <div class="rounds">
+      <div class="rounds-h">Your group &middot; rounds 1 to 3</div>
+      ${rounds.map(x=>roundRow(x.m,x.i)).join('')}
+    </div>
+  </div>`;
+}
+function roundRow(m,i){
+  const first=m.opp.split(' ')[0];
+  let badge='',action='',extra='';
+  if(m.st==='arrange'){
+    badge='<span class="badge arrange">To arrange</span>';
+    action=`<button class="btn green sm" onclick="reportScore(${i})">Report result</button>`;
+  }else if(m.st==='reported'){
+    badge='<span class="badge wait">Awaiting '+first+'</span>';
+    action=`<button class="btn line sm" onclick="reportScore(${i})">Edit</button>`;
+    extra=`<div class="rscore">${m.won?'You won':'You lost'} ${m.score}</div>
+      <div class="demo-links">${first} notified by email &middot; organiser informed &middot; <a onclick="setStatus(${i},'confirmed')">demo: ${first} confirms</a> &middot; <a onclick="setStatus(${i},'disputed')">disputes</a></div>`;
+  }else if(m.st==='confirmed'){
+    badge='<span class="badge confirm">Confirmed</span>';
+    action=`<button class="btn line sm" onclick="reportScore(${i})">Edit</button>`;
+    extra=`<div class="rscore">${m.won?'You won':'You lost'} ${m.score} &middot; counted in your ranking</div>`;
+  }else if(m.st==='disputed'){
+    badge='<span class="badge dispute">Disputed</span>';
+    action=`<button class="btn line sm" onclick="reportScore(${i})">Edit score</button>`;
+    extra=`<div class="rscore">${m.score}</div><div class="demo-links">${first} disputed the score &middot; organiser will resolve &middot; <a onclick="setStatus(${i},'confirmed')">demo: resolve</a></div>`;
+  }
+  return `<div class="roundrow">
+    <div class="rnd">R${m.round}</div>
+    <div class="oppinfo">
+      <div class="oppname"><span class="flag">${m.f}</span>${m.opp}</div>
+      <div class="oppcontact"><a href="mailto:${m.email}">${m.email}</a><a href="tel:${m.phone.replace(/\s/g,'')}">${m.phone}</a></div>
+    </div>
+    ${badge}${action}
+    ${extra?`<div class="rextra">${extra}</div>`:''}
+  </div>`;
 }
 function reportScore(i){
   const m=S.matches[i],first=m.opp.split(' ')[0];
-  openModal(`<div class="mh"><h3>Report vs ${m.opp}</h3><button class="x" onclick="closeModal()">×</button></div>
+  openModal(`<div class="mh"><h3>Round ${m.round} vs ${m.opp}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
-      <p style="font-size:13px;color:var(--muted);text-align:center;margin:0 0 16px">Enter the games you each won in every set. ${first} confirms, then your points update.</p>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin:0 0 16px">Enter the games you each won in every set. ${first} is notified to confirm and the organiser gets the result.</p>
       <div class="scoregrid">
         <span></span><span class="colh">You</span><span></span><span class="colh">${first}</span>
         <span class="slbl">Set 1</span><input id="s1y" inputmode="numeric" value="6"><span class="dash">-</span><input id="s1o" inputmode="numeric" value="3">
@@ -650,7 +746,7 @@ function reportScore(i){
       <p class="hint">2 sets to 6 games. Only fill the tiebreak (to 10) if you each won a set.</p>
     </div>
     <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button>
-    <button class="btn green sm" onclick="confirmReport(${i})">Submit result</button></div>`);
+    <button class="btn green sm" onclick="confirmReport(${i})">Send result</button></div>`);
 }
 function confirmReport(i){
   const m=S.matches[i];
@@ -665,13 +761,15 @@ function confirmReport(i){
     if(tby==null||tbo==null){toast('Sets are 1-1, add the tiebreak');return}
     won=tby>tbo; score+=`, [${tby}-${tbo}]`;
   }else won=youSets>oppSets;
-  const add=winPts(m.tname);
-  m.st="wait";
-  if(won){m.when=`You won ${score} &middot; +${add} pts pending`;S.pts+=add;S.w+=1;}
-  else{m.when=`Lost ${score} &middot; awaiting confirmation`;S.l+=1;}
-  S.played+=1;S.act+=20;
-  save();closeModal();renderAll();
-  toast(won?`Win submitted &middot; <b>+${add} pts</b> pending confirmation`:`Result submitted &middot; awaiting confirmation`);
+  m.score=score; m.won=won; m.st='reported';
+  recompute(); save(); closeModal(); renderAll();
+  toast(`Result sent &middot; <b>${m.opp.split(' ')[0]}</b> notified to confirm, organiser informed`);
+}
+function setStatus(i,st){
+  const m=S.matches[i],first=m.opp.split(' ')[0];
+  m.st=st; recompute(); save(); renderAll();
+  if(st==='confirmed')toast(`${first} confirmed &middot; result counted in your ranking`);
+  else if(st==='disputed')toast(`${first} disputed &middot; organiser will resolve`);
 }
 
 /* ============ organiser ============ */
