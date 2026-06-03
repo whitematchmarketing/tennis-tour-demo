@@ -240,7 +240,7 @@
       <div class="card step"><div class="num">1</div><h3>Pick your level</h3><p>Juniors, Futures, Challengers, ATP/WTA or Masters. You can enter events at your level, one below, or one above.</p></div>
       <div class="card step"><div class="num">2</div><h3>Enter a tournament</h3><p>€15 each, four players in a round robin. New events are posted every Saturday morning.</p></div>
       <div class="card step"><div class="num">3</div><h3>Play your match</h3><p>You get your opponents' contacts each week and one week to play. Two sets to 6 games, tiebreak to 10 if level.</p></div>
-      <div class="card step"><div class="num">4</div><h3>Report your score</h3><p>Submit the result online. Your opponent confirms and your points are added automatically.</p></div>
+      <div class="card step"><div class="num">4</div><h3>Report your score</h3><p>Submit the result online. It counts straight away, your opponent is notified and can dispute it if needed.</p></div>
       <div class="card step"><div class="num">5</div><h3>Climb the rankings</h3><p>Points count for a full year and update every Wednesday. Finish 1st in five events at your level to move up.</p></div>
       <div class="card step"><div class="num">6</div><h3>Earn on activity</h3><p>Play more to earn badges and activity points on the leaderboard. The more you play, the more you earn.</p></div>
     </div>
@@ -253,7 +253,7 @@
         <p>Takes about 30 seconds and starts your ranking history. Then you can enter any open tournament.</p>
         <div class="check"><span class="c">✓</span><div>Choose your starting level, move up as you win</div></div>
         <div class="check"><span class="c">✓</span><div>Enter and withdraw from tournaments yourself</div></div>
-        <div class="check"><span class="c">✓</span><div>Report scores from your phone, opponent confirms</div></div>
+        <div class="check"><span class="c">✓</span><div>Report scores from your phone, opponent can dispute</div></div>
         <div class="check"><span class="c">✓</span><div>Reminders before every entry deadline and match</div></div>
         <div class="check"><span class="c">✓</span><div>Play at least one ranked match per week</div></div>
       </div>
@@ -278,7 +278,7 @@
 <!-- ============ RANKINGS ============ -->
 <div class="view" id="view-rankings">
   <section class="wrap">
-    <div class="shead"><h2>Rankings</h2><p>Updated automatically the moment a match is confirmed. Points count for one year. 1st place earns the tournament's number in points (Challengers 200 = 200 pts).</p></div>
+    <div class="shead"><h2>Rankings</h2><p>Updated automatically the moment a match is reported. Points count for one year. 1st place earns the tournament's number in points (Challengers 200 = 200 pts).</p></div>
     <div class="rtabs" id="rtabs"></div>
     <div class="card" style="overflow:hidden">
       <table>
@@ -871,7 +871,7 @@ function reportScore(i){
   const m=S.matches[i],first=m.opp.split(' ')[0];
   openModal(`<div class="mh"><h3>Round ${m.round} vs ${m.opp}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
-      <p style="font-size:13px;color:var(--muted);text-align:center;margin:0 0 16px">Enter the games you each won in every set. ${first} is notified to confirm and the organiser gets the result.</p>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin:0 0 16px">Enter the games you each won in every set. It counts straight away, ${first} is notified and can dispute, and the organiser gets the result.</p>
       <div class="scoregrid">
         <span></span><span class="colh">You</span><span></span><span class="colh">${first}</span>
         <span class="slbl">Set 1</span><input id="s1y" inputmode="numeric" value="6"><span class="dash">-</span><input id="s1o" inputmode="numeric" value="3">
