@@ -530,7 +530,7 @@ function openEntry(id){
       <div class="kv"><span>Entry deadline</span><b>${t.deadline}</b></div>
       <div class="kv"><span>Entry fee</span><b>€15 (Revolut / BOV)</b></div>
       <div class="kv"><span>Your level</span><b>${S.profile.level} ${ok?'✓ eligible':'⚠ outside range'}</b></div>
-      <p class="hint">${ok?'You will get your group and opponents\\' contacts when the draw is made.':'This event is normally for '+eligibleLevels(lvl).join(', ')+'. You can still try it in the demo.'}</p>
+      <p class="hint">${ok?'You will get your group and opponent contacts when the draw is made.':'This event is normally for '+eligibleLevels(lvl).join(', ')+'. You can still try it in the demo.'}</p>
     </div>
     <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button>
     <button class="btn green sm" onclick="doEnter('${t.id}')">Confirm entry</button></div>`);
