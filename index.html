@@ -363,6 +363,18 @@
           <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Approve a player and add them to their level.</p>
           <div id="adm-regs"></div>
         </div>
+        <div class="card pad">
+          <h3 style="font-size:16px;margin-bottom:4px">Rankings <span class="badge confirm">auto</span></h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Rankings calculate themselves from match results, nobody uploads them. Use a manual adjustment only for imported history, strike penalties, or a correction.</p>
+          <form onsubmit="applyAdjust(event)">
+            <div class="two">
+              <div class="field"><label>Player</label><select name="aj_player" id="aj_player"></select></div>
+              <div class="field"><label>Points (+ or -)</label><input name="aj_pts" type="number" value="0" /></div>
+            </div>
+            <div class="field"><label>Reason</label><input name="aj_reason" placeholder="e.g. imported history, strike penalty" /></div>
+            <button class="btn green sm" type="submit" style="width:100%;justify-content:center">Apply adjustment</button>
+          </form>
+        </div>
       </div>
     </div>
   </section>
@@ -541,7 +553,7 @@ const OPPONENTS=[
 const KEY="tot_demo_v3";
 let S=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},requireApproval:true,regApproved:false,pts:0,w:0,l:0,act:0,played:0}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -768,7 +780,7 @@ function recompute(){
   S.matches.forEach(m=>{
     if(m.st==='reported'||m.st==='confirmed'){played++; if(m.won){pts+=winPts(m.tname);w++;}else{l++;}}
   });
-  S.pts=pts;S.w=w;S.l=l;S.played=played;S.act=played*20;
+  S.pts=Math.max(0,pts+(S.adjust||0));S.w=w;S.l=l;S.played=played;S.act=played*20;
 }
 function renderDash(){
   const b=document.getElementById('dash-body');
@@ -964,6 +976,17 @@ function renderAdmin(){
   cc.textContent=disputes?`${disputes} to resolve`:`${all.length} results`;
   cc.className='badge '+(disputes?'dispute':'confirm');
   document.getElementById('reg-count').textContent=(pendingRegs.length+(myReg?1:0))+' new';
+  const ajSel=document.getElementById('aj_player');
+  if(ajSel)ajSel.innerHTML=(S.profile?`<option value="__me">${meName()} (you)</option>`:'')+SAMPLE_PLAYERS.map(p=>`<option value="${p.n}">${p.n} - ${p.p} pts</option>`).join('');
+}
+function applyAdjust(e){
+  e.preventDefault();
+  const f=e.target, who=f.aj_player.value, pts=parseInt(f.aj_pts.value,10)||0, reason=(f.aj_reason.value||'').trim()||'adjustment';
+  if(!pts){toast('Enter a point change first');return}
+  if(who==='__me'){S.adjust=(S.adjust||0)+pts;recompute();save()}
+  else{const p=SAMPLE_PLAYERS.find(x=>x.n===who);if(p)p.p=Math.max(0,p.p+pts)}
+  renderAll(); f.reset();
+  toast(`${who==='__me'?meName():who} adjusted ${pts>0?'+':''}${pts} pts &middot; ${reason}`);
 }
 function resolveSample(key){sampleResults=sampleResults.map(r=>((r.a+'|'+r.b).replace(/'/g,'')===key?{...r,st:'reported'}:r));renderAdmin();toast('Dispute resolved &middot; result stands')}
 function orgVoid(i){const m=S.matches[i];if(!m)return;m.st='arrange';m.score='';m.won=false;recompute();save();renderAll();toast('Result voided &middot; round sent back to be replayed')}
