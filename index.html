@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tennis Online Tour - Concept Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --green:#0d5c3a;       /* tour green */
+    --green-d:#073a25;
+    --clay:#d8632e;        /* clay court */
+    --ball:#d4ff3f;        /* tennis ball */
+    --ink:#13201a;
+    --muted:#5d6b63;
+    --line:#e7ece8;
+    --bg:#f4f7f4;
+    --card:#ffffff;
+    --shadow:0 1px 2px rgba(7,58,37,.04),0 8px 24px rgba(7,58,37,.06);
+    --shadow-lg:0 12px 40px rgba(7,58,37,.14);
+    --r:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,.brandtext{font-family:Sora,Inter,sans-serif;letter-spacing:-.02em}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* demo ribbon */
+  .ribbon{background:var(--ink);color:#dfeee6;font-size:12.5px;text-align:center;padding:7px 12px;font-weight:500}
+  .ribbon b{color:var(--ball)}
+
+  /* nav */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;gap:18px;height:62px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--green),var(--green-d));display:grid;place-items:center;font-size:18px}
+  .tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+  .tab{border:0;background:transparent;font:inherit;font-weight:600;font-size:14px;color:var(--muted);padding:9px 14px;border-radius:10px;cursor:pointer;transition:.15s}
+  .tab:hover{color:var(--ink);background:#eef3ef}
+  .tab.active{color:#fff;background:var(--green)}
+  .menubtn{display:none}
+
+  /* views */
+  .view{display:none;animation:fade .25s ease}
+  .view.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  section{padding:34px 0}
+
+  /* hero */
+  .hero{background:radial-gradient(1200px 400px at 80% -10%,rgba(212,255,63,.18),transparent),linear-gradient(160deg,var(--green),var(--green-d));color:#eafff4;border-radius:0 0 30px 30px;overflow:hidden;position:relative}
+  .hero .wrap{padding-top:46px;padding-bottom:50px;position:relative;z-index:2}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#eafff4;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+  .hero h1{font-size:clamp(30px,5vw,48px);line-height:1.05;margin:16px 0 12px;color:#fff}
+  .hero h1 span{color:var(--ball)}
+  .hero p{max-width:560px;color:#cfeadd;font-size:16px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+  .btn{border:0;font:inherit;font-weight:700;font-size:15px;padding:13px 22px;border-radius:12px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+  .btn.primary{background:var(--ball);color:var(--green-d)}
+  .btn.primary:hover{filter:brightness(1.05);transform:translateY(-1px)}
+  .btn.ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .btn.ghost:hover{background:rgba(255,255,255,.18)}
+  .btn.sm{padding:9px 14px;font-size:13.5px;border-radius:10px}
+  .btn.green{background:var(--green);color:#fff}
+  .btn.green:hover{background:var(--green-d)}
+  .btn.line{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .btn.line:hover{border-color:#c7d2cb}
+  .stats{display:flex;gap:30px;margin-top:34px;flex-wrap:wrap}
+  .stat .n{font-family:Sora;font-size:26px;font-weight:800;color:#fff}
+  .stat .l{font-size:12.5px;color:#bfe0d2;text-transform:uppercase;letter-spacing:.06em}
+
+  /* generic section head */
+  .shead{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  .shead h2{font-size:24px}
+  .shead p{color:var(--muted);font-size:14px;margin-top:4px}
+
+  /* cards / grid */
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+  .pad{padding:18px}
+
+  /* feature cards */
+  .feat{padding:20px}
+  .feat .ic{width:42px;height:42px;border-radius:11px;background:#eef6f0;display:grid;place-items:center;font-size:20px;margin-bottom:12px}
+  .feat h3{font-size:16.5px;margin-bottom:5px}
+  .feat p{color:var(--muted);font-size:13.5px}
+
+  /* tournament card */
+  .tcard{overflow:hidden}
+  .tcard .top{height:84px;background:linear-gradient(120deg,var(--green),#127a4d);position:relative;display:flex;align-items:center;padding:0 16px}
+  .tcard .top.clay{background:linear-gradient(120deg,#c7551f,var(--clay))}
+  .tcard .top.masters{background:linear-gradient(120deg,#1f2a44,#2f3d63)}
+  .tcard .tier{color:#fff;font-family:Sora;font-weight:800;font-size:18px}
+  .pill{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+  .pill.up{background:var(--ball);color:var(--green-d)}
+  .pill.on{background:#fff;color:var(--clay)}
+  .pill.fin{background:rgba(255,255,255,.25);color:#fff}
+  .tcard .body{padding:15px 16px}
+  .tcard .meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin:4px 0}
+  .tcard .meta b{color:var(--ink);font-weight:600}
+  .tcard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .slots{font-size:12.5px;color:var(--muted)}
+
+  /* rankings */
+  .rtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .rtab{border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;font-size:13px;color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer}
+  .rtab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line)}
+  td{padding:12px 14px;border-bottom:1px solid var(--line)}
+  tbody tr:hover{background:#f7faf8}
+  .rk{font-family:Sora;font-weight:800;width:42px}
+  .rk.g{color:var(--clay)}
+  .pname{font-weight:600;display:flex;align-items:center;gap:9px}
+  .flag{font-size:16px}
+  .pts{font-weight:800;font-family:Sora;text-align:right}
+  .wl{color:var(--muted);font-size:12.5px}
+  .up-ar{color:#1a9c5b;font-weight:700}
+  .me-row{background:#f0faf3 !important;box-shadow:inset 3px 0 0 var(--green)}
+
+  /* dashboard */
+  .dash-top{display:grid;grid-template-columns:1.1fr 2fr;gap:16px}
+  .me{background:linear-gradient(160deg,var(--green),var(--green-d));color:#eafff4;border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+  .me .av{width:54px;height:54px;border-radius:14px;background:var(--ball);color:var(--green-d);display:grid;place-items:center;font-family:Sora;font-weight:800;font-size:22px}
+  .me h3{color:#fff;margin-top:12px;font-size:20px}
+  .me .sub{color:#bfe0d2;font-size:13px}
+  .me .row3{display:flex;gap:18px;margin-top:16px}
+  .me .row3 .n{font-family:Sora;font-weight:800;font-size:20px;color:#fff}
+  .me .row3 .l{font-size:11px;color:#bfe0d2;text-transform:uppercase;letter-spacing:.05em}
+  .match{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .match:last-child{border-bottom:0}
+  .match .vs{flex:1}
+  .match .vs .opp{font-weight:600}
+  .match .vs .when{font-size:12.5px;color:var(--muted)}
+  .badge{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px}
+  .badge.wait{background:#fff4e6;color:#b8631b}
+  .badge.confirm{background:#eafaf0;color:#1a9c5b}
+  .badge.done{background:#eef3ef;color:var(--muted)}
+
+  /* admin */
+  .adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .listrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .listrow:last-child{border-bottom:0}
+  .listrow .info{flex:1}
+  .listrow .info b{font-size:14px}
+  .listrow .info span{display:block;font-size:12.5px;color:var(--muted)}
+  .toggle-actions{display:flex;gap:6px}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .field input,.field select{width:100%;font:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fbfdfc}
+  .field input:focus,.field select:focus{outline:0;border-color:var(--green);background:#fff}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* register */
+  .reg{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .reg-side h2{font-size:26px;margin-bottom:10px}
+  .reg-side p{color:var(--muted);margin-bottom:16px}
+  .check{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px;font-size:14px}
+  .check .c{color:var(--green);font-weight:800;margin-top:1px}
+  .ok{text-align:center;padding:30px 18px}
+  .ok .big{width:64px;height:64px;border-radius:50%;background:#eafaf0;color:#1a9c5b;display:grid;place-items:center;font-size:30px;margin:0 auto 14px}
+
+  /* sponsor strip */
+  .sponsors{display:flex;gap:26px;align-items:center;justify-content:center;flex-wrap:wrap;opacity:.7;font-weight:700;color:var(--muted);font-size:14px;padding:10px 0}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(11,32,22,.5);backdrop-filter:blur(3px);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:18px;max-width:430px;width:100%;box-shadow:var(--shadow-lg);overflow:hidden;animation:pop .2s ease}
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal .mh{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .modal .mh h3{font-size:17px}
+  .modal .mb{padding:20px}
+  .modal .mf{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
+  .x{border:0;background:#eef3ef;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;color:var(--muted)}
+  .score-in{display:flex;gap:8px;align-items:center;justify-content:center;margin:6px 0 4px}
+  .score-in input{width:46px;text-align:center;font-size:18px;font-weight:700;padding:9px;border:1px solid var(--line);border-radius:10px}
+  .score-in .dash{color:var(--muted);font-weight:700}
+  .hint{font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px}
+
+  /* toast */
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#eafff4;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:.3s;z-index:200;display:flex;gap:9px;align-items:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast b{color:var(--ball)}
+
+  footer{background:var(--ink);color:#9fc4b3;padding:30px 0;margin-top:40px;font-size:13px}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+  footer b{color:#fff}
+
+  @media(max-width:820px){
+    .g3,.g2,.reg,.dash-top,.adm-grid,.two{grid-template-columns:1fr}
+    .tabs{display:none}
+    .tabs.open{display:flex;position:absolute;top:62px;left:0;right:0;background:#fff;flex-direction:column;padding:10px;border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+    .menubtn{display:grid;place-items:center;margin-left:auto;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="ribbon">CONCEPT DEMO &nbsp;&middot;&nbsp; sample data, nothing is saved &nbsp;&middot;&nbsp; this would live at <b>register.tennisonlinetour.com</b> and link from the current site</div>
+
+<header class="nav">
+  <div class="wrap navrow">
+    <div class="brand"><div class="logo">🎾</div> Tennis Online Tour</div>
+    <button class="menubtn" onclick="document.getElementById('tabs').classList.toggle('open')">☰</button>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-v="home" onclick="go('home')">Home</button>
+      <button class="tab" data-v="tournaments" onclick="go('tournaments')">Tournaments</button>
+      <button class="tab" data-v="rankings" onclick="go('rankings')">Rankings</button>
+      <button class="tab" data-v="dash" onclick="go('dash')">My Dashboard</button>
+      <button class="tab" data-v="admin" onclick="go('admin')">Organiser</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HOME / REGISTER ============ -->
+<div class="view show" id="view-home">
+  <div class="hero">
+    <div class="wrap">
+      <span class="eyebrow">🎾 Malta &middot; Worldwide players &middot; Weekly ranking</span>
+      <h1>Connect. Compete. <span>Conquer.</span></h1>
+      <p>Play real competitive matches on your own schedule, report your scores online, and climb a live world-style ranking from Juniors to Masters.</p>
+      <div class="cta">
+        <button class="btn primary" onclick="go('home');scrollToReg()">Register to play →</button>
+        <button class="btn ghost" onclick="go('tournaments')">Browse tournaments</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="n">312</div><div class="l">Players</div></div>
+        <div class="stat"><div class="n">7</div><div class="l">Tiers</div></div>
+        <div class="stat"><div class="n">48</div><div class="l">Live tournaments</div></div>
+        <div class="stat"><div class="n">1.9k</div><div class="l">Matches played</div></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <div class="shead"><div><h2>Everything online, nothing by email</h2><p>The four things players and the organiser do every week, now self-service.</p></div></div>
+    <div class="grid g3">
+      <div class="card feat"><div class="ic">📝</div><h3>One-tap registration</h3><p>No Google Forms. Sign up once, get a profile, and enter any tournament with a click.</p></div>
+      <div class="card feat"><div class="ic">🏆</div><h3>Enter tournaments</h3><p>See your tier, open spots and deadlines. Enter or withdraw yourself, instantly.</p></div>
+      <div class="card feat"><div class="ic">✅</div><h3>Report your own scores</h3><p>Submit the result, your opponent confirms, ranking updates automatically. No more messaging the organiser.</p></div>
+      <div class="card feat"><div class="ic">📊</div><h3>Live rankings</h3><p>Points and the activity leaderboard recalculate the moment a match is confirmed.</p></div>
+    </div>
+  </section>
+
+  <section class="wrap" id="regblock">
+    <div class="reg">
+      <div class="reg-side">
+        <h2>Create your player profile</h2>
+        <p>Takes 30 seconds. Replaces the current Google Form and starts your ranking history.</p>
+        <div class="check"><span class="c">✓</span><div>Pick your starting tier, change it as you climb</div></div>
+        <div class="check"><span class="c">✓</span><div>Get a personal dashboard for matches and scores</div></div>
+        <div class="check"><span class="c">✓</span><div>Email and WhatsApp reminders before each deadline</div></div>
+        <div class="check"><span class="c">✓</span><div>Existing Google Form sign-ups are imported automatically</div></div>
+        <div class="sponsors" style="justify-content:flex-start;margin-top:18px">Backed by &nbsp; Tennis Trade &nbsp;&middot;&nbsp; Tappwater Malta</div>
+      </div>
+      <div class="card pad" id="regcard">
+        <form onsubmit="submitReg(event)">
+          <div class="two">
+            <div class="field"><label>First name</label><input required placeholder="Marco" /></div>
+            <div class="field"><label>Last name</label><input required placeholder="Borg" /></div>
+          </div>
+          <div class="field"><label>Email</label><input type="email" required placeholder="you@email.com" /></div>
+          <div class="two">
+            <div class="field"><label>WhatsApp / phone</label><input required placeholder="+356 ..." /></div>
+            <div class="field"><label>Country</label>
+              <select><option>Malta</option><option>Italy</option><option>Spain</option><option>France</option><option>Germany</option><option>United Kingdom</option><option>Other</option></select>
+            </div>
+          </div>
+          <div class="field"><label>Starting tier</label>
+            <select><option>Juniors 75 (beginner)</option><option>Futures 150 (low intermediate)</option><option selected>Challengers 200 (intermediate)</option><option>ATP / WTA 250</option><option>ATP / WTA 500</option><option>Masters 1000 (advanced)</option></select>
+          </div>
+          <button class="btn green" style="width:100%;justify-content:center" type="submit">Create my profile</button>
+          <p class="hint">By registering you agree to play at least one ranked match per week.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TOURNAMENTS ============ -->
+<div class="view" id="view-tournaments">
+  <section class="wrap">
+    <div class="shead"><div><h2>Tournaments</h2><p>Enter or withdraw yourself. Spots and deadlines update live.</p></div>
+      <select class="btn line sm" style="padding-right:30px"><option>All tiers</option><option>Juniors</option><option>Futures</option><option>Challengers</option><option>ATP / WTA</option><option>Masters</option></select>
+    </div>
+    <h3 style="font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:6px 0 12px">Upcoming</h3>
+    <div class="grid g3" id="t-up"></div>
+    <h3 style="font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:26px 0 12px">Ongoing</h3>
+    <div class="grid g3" id="t-on"></div>
+    <h3 style="font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:26px 0 12px">Finished</h3>
+    <div class="grid g3" id="t-fin"></div>
+  </section>
+</div>
+
+<!-- ============ RANKINGS ============ -->
+<div class="view" id="view-rankings">
+  <section class="wrap">
+    <div class="shead"><div><h2>Live rankings</h2><p>Updates automatically when a match is confirmed. No more Wednesday spreadsheet edits.</p></div></div>
+    <div class="rtabs" id="rtabs"></div>
+    <div class="card" style="overflow:hidden">
+      <table>
+        <thead><tr><th class="rk">#</th><th>Player</th><th>Tier</th><th class="wl">W&nbsp;-&nbsp;L</th><th style="text-align:right">Points</th></tr></thead>
+        <tbody id="rbody"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="text-align:left;margin-top:12px">Tip: your row is highlighted in green. Report a match in <b>My Dashboard</b> and watch the points move here.</p>
+  </section>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div class="view" id="view-dash">
+  <section class="wrap">
+    <div class="shead"><div><h2>My dashboard</h2><p>Your matches, scores and ranking in one place.</p></div></div>
+    <div class="dash-top">
+      <div class="me">
+        <div class="av" id="me-av">MB</div>
+        <h3>Marco Borg <span style="font-size:14px;opacity:.7">🇲🇹</span></h3>
+        <div class="sub">Challengers 200 &middot; member since 2026</div>
+        <div class="row3">
+          <div><div class="n" id="me-rank">#6</div><div class="l">Rank</div></div>
+          <div><div class="n" id="me-pts">1,180</div><div class="l">Points</div></div>
+          <div><div class="n" id="me-wl">14-6</div><div class="l">Win-Loss</div></div>
+        </div>
+      </div>
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 style="font-size:16px">My matches</h3>
+          <button class="btn line sm" onclick="toast('In the live version this opens the opponent finder')">+ Schedule match</button>
+        </div>
+        <div id="matches"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ ADMIN ============ -->
+<div class="view" id="view-admin">
+  <section class="wrap">
+    <div class="shead"><div><h2>Organiser dashboard</h2><p>This is what your friend uses. No code, works like a friendly spreadsheet. He owns the account.</p></div></div>
+    <div class="adm-grid">
+      <div class="card pad">
+        <h3 style="font-size:16px;margin-bottom:4px">Create a tournament</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Fill it in, hit publish. The draw builds itself from who enters.</p>
+        <form onsubmit="createTourney(event)">
+          <div class="field"><label>Name</label><input required placeholder="Challengers 200 - June Open" /></div>
+          <div class="two">
+            <div class="field"><label>Tier</label><select><option>Juniors 75</option><option>Futures 150</option><option selected>Challengers 200</option><option>ATP / WTA 250</option><option>Masters 1000</option></select></div>
+            <div class="field"><label>Max players</label><input type="number" value="16" /></div>
+          </div>
+          <div class="two">
+            <div class="field"><label>Entry deadline</label><input type="date" /></div>
+            <div class="field"><label>Start date</label><input type="date" /></div>
+          </div>
+          <button class="btn green" style="width:100%;justify-content:center" type="submit">Publish tournament</button>
+        </form>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card pad">
+          <h3 style="font-size:16px;margin-bottom:4px">Scores to confirm <span class="badge wait" id="conf-count">2 pending</span></h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Both players agreed, or you can override a dispute.</p>
+          <div id="adm-scores"></div>
+        </div>
+        <div class="card pad">
+          <h3 style="font-size:16px;margin-bottom:4px">New registrations <span class="badge confirm" id="reg-count">3 new</span></h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Approve with one tap. Tick to add to a tier.</p>
+          <div id="adm-regs"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer><div class="wrap">
+  <div>🎾 <b>Tennis Online Tour</b> &middot; concept demo built for review</div>
+  <div>Current site stays on Squarespace &middot; this app would be linked safely from it</div>
+</div></footer>
+
+<!-- modal -->
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<!-- toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- data ---------- */
+const TIERS=["All","Juniors","Futures","Challengers","ATP/WTA","Masters"];
+let players=[
+  {n:"Sofia Ricci",f:"🇮🇹",t:"ATP/WTA",p:2140,w:31,l:7,d:"+1"},
+  {n:"Liam O'Connor",f:"🇬🇧",t:"Masters",p:1980,w:27,l:9,d:""},
+  {n:"Aless. Conti",f:"🇮🇹",t:"Challengers",p:1610,w:22,l:8,d:"+2"},
+  {n:"Pierre Dubois",f:"🇫🇷",t:"Challengers",p:1440,w:19,l:10,d:""},
+  {n:"Hannah Vella",f:"🇲🇹",t:"Futures",p:1290,w:17,l:9,d:""},
+  {n:"Marco Borg",f:"🇲🇹",t:"Challengers",p:1180,w:14,l:6,d:"",me:true},
+  {n:"Diego Santos",f:"🇪🇸",t:"Futures",p:1040,w:13,l:11,d:""},
+  {n:"Lena Fischer",f:"🇩🇪",t:"Juniors",p:880,w:11,l:7,d:"+3"},
+  {n:"Yuki Tanaka",f:"🇯🇵",t:"Juniors",p:760,w:9,l:8,d:""},
+  {n:"Omar Haddad",f:"🇲🇹",t:"Futures",p:640,w:7,l:9,d:""},
+];
+const tourneys={
+  up:[
+    {tier:"Challengers 200",cls:"clay",pill:"up",label:"Opens soon",dl:"08 Jun",start:"12 Jun",slots:"6 / 16 spots",btn:"Enter"},
+    {tier:"Juniors 75",cls:"",pill:"up",label:"Opens soon",dl:"10 Jun",start:"15 Jun",slots:"9 / 16 spots",btn:"Enter"},
+    {tier:"ATP / WTA 250",cls:"",pill:"up",label:"Opens soon",dl:"14 Jun",start:"20 Jun",slots:"4 / 32 spots",btn:"Enter"},
+  ],
+  on:[
+    {tier:"Masters 1000",cls:"masters",pill:"on",label:"Live now",dl:"closed",start:"02 Jun",slots:"Round of 16",btn:"View draw"},
+    {tier:"Futures 150",cls:"clay",pill:"on",label:"Live now",dl:"closed",start:"30 May",slots:"Quarter-finals",btn:"View draw"},
+  ],
+  fin:[
+    {tier:"Masters 750",cls:"masters",pill:"fin",label:"Finished",dl:"-",start:"May",slots:"Won by S. Ricci",btn:"Results"},
+    {tier:"Challengers 175",cls:"clay",pill:"fin",label:"Finished",dl:"-",start:"Apr",slots:"Won by P. Dubois",btn:"Results"},
+  ]
+};
+let matches=[
+  {opp:"Diego Santos",f:"🇪🇸",when:"Played 01 Jun &middot; report your score",st:"report"},
+  {opp:"Pierre Dubois",f:"🇫🇷",when:"You reported 6-4 6-3 &middot; waiting for opponent",st:"wait"},
+  {opp:"Hannah Vella",f:"🇲🇹",when:"Scheduled Sat 07 Jun, 18:00",st:"sched"},
+  {opp:"Lena Fischer",f:"🇩🇪",when:"Confirmed 6-2 7-5 &middot; +40 pts",st:"done"},
+];
+let pendingRegs=[
+  {n:"Chris Camilleri",f:"🇲🇹",info:"Challengers 200"},
+  {n:"Aurora Bianchi",f:"🇮🇹",info:"Juniors 75"},
+  {n:"Tom Becker",f:"🇩🇪",info:"Futures 150"},
+];
+let pendingScores=[
+  {a:"D. Santos",b:"M. Borg",s:"6-3 4-6 7-5",info:"both players agree"},
+  {a:"H. Vella",b:"O. Haddad",s:"disputed",info:"scores do not match - needs you"},
+];
+
+/* ---------- nav ---------- */
+function go(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('show'));
+  document.getElementById('view-'+v).classList.add('show');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  document.getElementById('tabs').classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function scrollToReg(){setTimeout(()=>document.getElementById('regblock').scrollIntoView({behavior:'smooth'}),60)}
+
+/* ---------- render tournaments ---------- */
+function tcard(t){
+  return `<div class="card tcard"><div class="top ${t.cls}"><span class="tier">${t.tier}</span><span class="pill ${t.pill}">${t.label}</span></div>
+  <div class="body">
+    <div class="meta"><span>Entry deadline</span><b>${t.dl}</b></div>
+    <div class="meta"><span>Starts</span><b>${t.start}</b></div>
+    <div class="foot"><span class="slots">${t.slots}</span>
+    <button class="btn ${t.pill==='up'?'green':'line'} sm" onclick="${t.pill==='up'?`enterT('${t.tier}')`:`toast('Opening the live draw / results view')`}">${t.btn}</button></div>
+  </div></div>`;
+}
+function renderT(){
+  t_up.innerHTML=tourneys.up.map(tcard).join('');
+  t_on.innerHTML=tourneys.on.map(tcard).join('');
+  t_fin.innerHTML=tourneys.fin.map(tcard).join('');
+}
+function enterT(tier){
+  openModal(`<div class="mh"><h3>Enter ${tier}?</h3><button class="x" onclick="closeModal()">×</button></div>
+  <div class="mb"><p style="font-size:14px;color:var(--muted)">You will be added to the draw and notified when your first match is scheduled. You can withdraw any time before the deadline.</p></div>
+  <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button><button class="btn green sm" onclick="closeModal();toast('Entered <b>${tier}</b> - good luck!')">Confirm entry</button></div>`);
+}
+
+/* ---------- rankings ---------- */
+let curTier="All";
+function renderRtabs(){
+  rtabs.innerHTML=TIERS.map(t=>`<button class="rtab ${t===curTier?'active':''}" onclick="curTier='${t}';renderRtabs();renderRanks()">${t}</button>`).join('');
+}
+function renderRanks(){
+  const list=[...players].sort((a,b)=>b.p-a.p).filter(p=>curTier==='All'||p.t===curTier);
+  rbody.innerHTML=list.map((p,i)=>`<tr class="${p.me?'me-row':''}">
+    <td class="rk ${i<3?'g':''}">${i+1}</td>
+    <td><span class="pname"><span class="flag">${p.f}</span>${p.n}${p.d?` <span class="up-ar">▲${p.d}</span>`:''}</span></td>
+    <td style="color:var(--muted);font-size:13px">${p.t}</td>
+    <td class="wl">${p.w} - ${p.l}</td>
+    <td class="pts">${p.p.toLocaleString()}</td></tr>`).join('');
+}
+
+/* ---------- dashboard ---------- */
+function renderMatches(){
+  matches.innerHTML='';
+  matches.forEach((m,i)=>{
+    let action='';
+    if(m.st==='report')action=`<button class="btn green sm" onclick="reportScore(${i})">Report score</button>`;
+    else if(m.st==='wait')action=`<span class="badge wait">Awaiting opponent</span>`;
+    else if(m.st==='sched')action=`<span class="badge done">Scheduled</span>`;
+    else action=`<span class="badge confirm">Confirmed</span>`;
+    document.getElementById('matches').insertAdjacentHTML('beforeend',
+    `<div class="match"><span class="flag" style="font-size:20px">${m.f}</span>
+      <div class="vs"><div class="opp">vs ${m.opp}</div><div class="when">${m.when}</div></div>${action}</div>`);
+  });
+}
+function reportScore(i){
+  const m=matches[i];
+  openModal(`<div class="mh"><h3>Report vs ${m.opp}</h3><button class="x" onclick="closeModal()">×</button></div>
+  <div class="mb">
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:12px">Enter the final score. ${m.opp} confirms, then your ranking updates.</p>
+    <div class="score-in"><span style="font-size:13px;width:70px;text-align:right;color:var(--muted)">You</span><input value="6"/><span class="dash">-</span><input value="3"/><input value="6"/><span class="dash">-</span><input value="4"/></div>
+    <div class="score-in"><span style="font-size:13px;width:70px;text-align:right;color:var(--muted)">${m.opp.split(' ')[0]}</span><input value="3"/><span class="dash">-</span><input value="6"/><input value="4"/><span class="dash">-</span><input value="6"/></div>
+    <p class="hint">Best of 3 sets &middot; tap a number to change it</p>
+  </div>
+  <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button><button class="btn green sm" onclick="confirmReport(${i})">Submit result</button></div>`);
+}
+function confirmReport(i){
+  matches[i].when="You reported the score &middot; waiting for opponent";
+  matches[i].st="wait";
+  // simulate the win flowing into rankings
+  const me=players.find(p=>p.me); me.p+=40; me.w+=1;
+  closeModal(); renderMatches(); renderRanks(); refreshMe();
+  toast('Result submitted. <b>+40 pts</b> pending confirmation');
+}
+function refreshMe(){
+  const sorted=[...players].sort((a,b)=>b.p-a.p);
+  const me=players.find(p=>p.me);
+  document.getElementById('me-rank').textContent='#'+(sorted.indexOf(me)+1);
+  document.getElementById('me-pts').textContent=me.p.toLocaleString();
+  document.getElementById('me-wl').textContent=me.w+'-'+me.l;
+}
+
+/* ---------- admin ---------- */
+function renderAdmin(){
+  document.getElementById('adm-scores').innerHTML=pendingScores.map((s,i)=>`
+    <div class="listrow"><div class="info"><b>${s.a} vs ${s.b}</b><span>${s.s} &middot; ${s.info}</span></div>
+    <div class="toggle-actions"><button class="btn green sm" onclick="admScore(${i},1)">${s.s==='disputed'?'Resolve':'Confirm'}</button></div></div>`).join('') || '<p style="font-size:13px;color:var(--muted);padding:8px 0">All caught up 🎉</p>';
+  document.getElementById('adm-regs').innerHTML=pendingRegs.map((r,i)=>`
+    <div class="listrow"><span class="flag" style="font-size:20px">${r.f}</span><div class="info"><b>${r.n}</b><span>wants ${r.info}</span></div>
+    <button class="btn green sm" onclick="admReg(${i})">Approve</button></div>`).join('') || '<p style="font-size:13px;color:var(--muted);padding:8px 0">No new sign-ups</p>';
+  document.getElementById('conf-count').textContent=pendingScores.length+' pending';
+  document.getElementById('reg-count').textContent=pendingRegs.length+' new';
+}
+function admScore(i){pendingScores.splice(i,1);renderAdmin();toast('Score confirmed &middot; rankings updated')}
+function admReg(i){const r=pendingRegs[i];pendingRegs.splice(i,1);renderAdmin();toast('<b>'+r.n+'</b> approved &amp; added')}
+function createTourney(e){e.preventDefault();e.target.reset();toast('Tournament published &middot; players notified')}
+
+/* ---------- register ---------- */
+function submitReg(e){
+  e.preventDefault();
+  document.getElementById('regcard').innerHTML=`<div class="ok"><div class="big">✓</div>
+  <h3 style="font-size:20px">You're in, Marco!</h3>
+  <p style="color:var(--muted);font-size:14px;margin:8px 0 16px">Your profile is created and your ranking history has started. Next: enter a tournament.</p>
+  <button class="btn green" onclick="go('tournaments')">Browse tournaments →</button></div>`;
+  toast('Profile created &middot; welcome to the tour!');
+}
+
+/* ---------- modal + toast ---------- */
+function openModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('overlay').classList.add('show')}
+function closeModal(){document.getElementById('overlay').classList.remove('show')}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal()});
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.innerHTML='🎾 '+msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600)}
+
+/* ---------- init ---------- */
+renderT();renderRtabs();renderRanks();renderMatches();renderAdmin();
+</script>
+</body>
+</html>
