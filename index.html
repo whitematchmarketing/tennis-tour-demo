@@ -456,6 +456,8 @@
 .review-h{font-size:12px;font-weight:700;color:var(--clay)}
 .review p{font-size:14px;font-style:italic;margin:8px 0 6px;line-height:1.5}
 .review-by{font-size:12.5px;color:var(--muted)}
+.rowacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.yourmatch{font-size:10px;font-weight:700;background:var(--green);color:#fff;padding:2px 6px;border-radius:5px;margin-left:6px;text-transform:uppercase;letter-spacing:.03em}
 </style>
 
 <script>
@@ -718,26 +720,37 @@ const RESULTS=[
   {tour:"Challengers 175",tier:"Challengers",round:"Quarter-final",date:"10 May",p1:{n:"Alessandro Conti",f:"🇮🇹"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,1],[6,2]],h2h:[1,0],up:5,wow:0,review:"Strong serving day. Omar never stopped competing."},
   {tour:"Futures 125",tier:"Futures",round:"Semi-final",date:"31 May",p1:{n:"Diego Santos",f:"🇪🇸"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,4],[6,4]],h2h:[2,1],up:6,wow:1,review:"Solid baseline battle, great sportsmanship throughout."},
 ];
-let resTier="All";
+let resTier="All",FEED=[];
 function setline(sets,who){return sets.map(s=>`<span>${s[who]}</span>`).join('')}
+function playerResultCards(){
+  if(!S.profile)return [];
+  const yn=meName(),yf=FLAG[S.profile.country];
+  return S.matches.filter(m=>m.st==='reported'||m.st==='confirmed').map(m=>{
+    const raw=(m.score||'').split(', ').filter(Boolean).map(s=>s.replace(/[\[\]]/g,'').split('-').map(Number));
+    const p1=m.won?{n:yn,f:yf}:{n:m.opp,f:m.f}, p2=m.won?{n:m.opp,f:m.f}:{n:yn,f:yf};
+    const sets=m.won?raw:raw.map(s=>[s[1],s[0]]);
+    return {tour:m.tname,tier:levelOf(m.tname)||'Challengers',round:'Round '+m.round,date:'Just now',p1,p2,sets,h2h:[1,0],up:m.up||0,wow:0,review:'Reported through the app.',you:true};
+  });
+}
 function renderResults(){
+  FEED=[...playerResultCards(),...RESULTS];
   document.getElementById('champs').innerHTML=RESULTS.filter(m=>m.round==='Final').map(m=>`<div class="champ"><div class="cup" style="background:${TIER_COLOR[m.tier]}">🏆</div><div class="champ-i"><b>${m.p1.f} ${m.p1.n}</b><span>${m.tour}</span></div></div>`).join('');
   document.getElementById('restabs').innerHTML=["All",...LEVELS].map(t=>`<button class="rtab ${t===resTier?'active':''}" onclick="resTier='${t}';renderResults()">${t}</button>`).join('');
-  const list=RESULTS.map((m,i)=>({m,i})).filter(x=>resTier==='All'||x.m.tier===resTier);
+  const list=FEED.map((m,i)=>({m,i})).filter(x=>resTier==='All'||x.m.tier===resTier);
   document.getElementById('resfeed').innerHTML=list.map(x=>resCard(x.m,x.i)).join('')||'<p style="color:var(--muted);padding:14px 0">No results in this category yet.</p>';
 }
 function resCard(m,i){
   return `<div class="rescard" onclick="matchDetail(${i})">
-    <div class="res-top"><span class="res-tour"><span class="tdot" style="background:${TIER_COLOR[m.tier]}"></span>${m.tour} &middot; ${m.round}</span><span class="res-date">${m.date}</span></div>
+    <div class="res-top"><span class="res-tour"><span class="tdot" style="background:${TIER_COLOR[m.tier]}"></span>${m.tour} &middot; ${m.round}${m.you?' <span class="yourmatch">Your match</span>':''}</span><span class="res-date">${m.date}</span></div>
     <div class="pl winner"><span class="flag">${m.p1.f}</span><b>${m.p1.n}</b><span class="setline">${setline(m.sets,0)}</span><span class="wtick">✓</span></div>
     <div class="pl"><span class="flag">${m.p2.f}</span><span>${m.p2.n}</span><span class="setline">${setline(m.sets,1)}</span><span class="wtick">✓</span></div>
     <div class="res-foot"><span class="h2h">Head-to-head ${m.h2h[0]}-${m.h2h[1]}</span>
       <span class="reacts"><a onclick="reactUp(${i},event)">👍 ${m.up}</a><span>😮 ${m.wow}</span></span></div>
   </div>`;
 }
-function reactUp(i,e){e.stopPropagation();RESULTS[i].up++;renderResults()}
+function reactUp(i,e){e.stopPropagation();if(FEED[i])FEED[i].up++;renderResults()}
 function matchDetail(i){
-  const m=RESULTS[i],score=m.sets.map(s=>s[0]+'-'+s[1]).join(', ');
+  const m=FEED[i],score=m.sets.map(s=>s[0]+'-'+s[1]).join(', ');
   openModal(`<div class="mh"><h3>${m.tour} &middot; ${m.round}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
       <div class="pl winner" style="padding:7px 0"><span class="flag">${m.p1.f}</span><b>${m.p1.n}</b><span class="setline">${setline(m.sets,0)}</span><span class="wtick">✓</span></div>
@@ -926,9 +939,13 @@ function renderAdmin(){
   S.matches.forEach((m,idx)=>{if(m.st==='reported'||m.st==='disputed')mine.push({a:meName(),b:m.opp,score:m.score,t:m.tname,st:m.st,ref:idx,you:true})});
   const all=[...mine,...sampleResults];
   document.getElementById('adm-scores').innerHTML=all.map(r=>{
+    const key=(r.a+'|'+r.b).replace(/'/g,'');
     const badge=r.st==='disputed'?'<span class="badge dispute">Disputed</span>':'<span class="badge confirm">Recorded</span>';
-    const act=r.st==='disputed'?`<button class="btn green sm" onclick="${r.ref!=null?`setStatus(${r.ref},'reported')`:`resolveSample('${(r.a+'|'+r.b).replace(/'/g,'')}')`}">Resolve</button>`:'';
-    return `<div class="listrow ${r.you?'mine':''}"><div class="info"><b>${r.a} vs ${r.b}</b><span>${r.score} &middot; ${r.t}${r.you?' &middot; just reported':''}</span></div>${badge}${act}</div>`;
+    const editCall=r.ref!=null?`reportScore(${r.ref})`:`orgEditSample('${key}')`;
+    const voidCall=r.ref!=null?`orgVoid(${r.ref})`:`voidSample('${key}')`;
+    const resolve=r.st==='disputed'?`<button class="btn green sm" onclick="${r.ref!=null?`setStatus(${r.ref},'reported')`:`resolveSample('${key}')`}">Resolve</button>`:'';
+    return `<div class="listrow ${r.you?'mine':''}"><div class="info"><b>${r.a} vs ${r.b}</b><span>${r.score} &middot; ${r.t}${r.you?' &middot; just reported':''}</span></div>
+      <div class="rowacts">${badge}${resolve}<button class="btn line sm" onclick="${editCall}">Edit</button><button class="btn gray sm" onclick="${voidCall}">Void</button></div></div>`;
   }).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No results yet</p>';
   // tournament entries pending approval (player's own pending + samples)
   const myPending=(S.entries||[]).filter(id=>(S.entryStatus||{})[id]==='pending').map(id=>({n:meName(),f:S.profile?FLAG[S.profile.country]:'🎾',t:(findT(id)||{}).name||'',ref:id,you:true}));
@@ -949,6 +966,25 @@ function renderAdmin(){
   document.getElementById('reg-count').textContent=(pendingRegs.length+(myReg?1:0))+' new';
 }
 function resolveSample(key){sampleResults=sampleResults.map(r=>((r.a+'|'+r.b).replace(/'/g,'')===key?{...r,st:'reported'}:r));renderAdmin();toast('Dispute resolved &middot; result stands')}
+function orgVoid(i){const m=S.matches[i];if(!m)return;m.st='arrange';m.score='';m.won=false;recompute();save();renderAll();toast('Result voided &middot; round sent back to be replayed')}
+function voidSample(key){sampleResults=sampleResults.filter(x=>(x.a+'|'+x.b).replace(/'/g,'')!==key);renderAdmin();toast('Result voided')}
+function orgEditSample(key){
+  const r=sampleResults.find(x=>(x.a+'|'+x.b).replace(/'/g,'')===key); if(!r)return;
+  openModal(`<div class="mh"><h3>Edit result</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 12px">${r.a} vs ${r.b} &middot; ${r.t}</p>
+      <div class="field"><label>Score</label><input id="es_score" value="${r.score}" /></div>
+      <div class="field"><label>Winner</label><select id="es_win"><option value="a">${r.a}</option><option value="b">${r.b}</option></select></div>
+      <p class="hint" style="text-align:left">Organiser override: fix a wrong score or settle a dispute. The result and rankings update for everyone.</p>
+    </div>
+    <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button><button class="btn green sm" onclick="saveEditSample('${key}')">Save</button></div>`);
+}
+function saveEditSample(key){
+  const r=sampleResults.find(x=>(x.a+'|'+x.b).replace(/'/g,'')===key); if(!r)return;
+  r.score=document.getElementById('es_score').value;
+  if(document.getElementById('es_win').value==='b'){const t=r.a;r.a=r.b;r.b=t}
+  r.st='reported'; closeModal(); renderAdmin(); toast('Result updated by organiser')
+}
 function admReg(i){const r=pendingRegs[i];pendingRegs.splice(i,1);renderAdmin();toast('<b>'+r.n+'</b> approved')}
 function approveMyReg(){S.regApproved=true;save();renderAll();toast('<b>'+meName()+'</b> approved &middot; player can now enter tournaments')}
 function createTourney(e){
