@@ -378,7 +378,7 @@
     </div>
 
     <div class="badges-wrap">
-      <div class="shead" style="margin-top:38px"><h2 style="font-size:21px">What the badges mean</h2><p>Earn these by playing and winning matches. Activity points reset monthly, badges reset weekly, and you can hold one of each at a time.</p></div>
+      <div class="shead" style="margin-top:38px"><h2 style="font-size:21px">Badges</h2><p>Badges are placed next to your name in the rankings and reset each week. You can only have one of the same badge at a time. Every match earns activity points too, and every 100 points is a free tournament voucher.</p></div>
       <div class="badge-grid" id="badge-legend"></div>
     </div>
   </section>
@@ -570,10 +570,11 @@
 .remind-i{font-size:18px;flex:none}
 .remind b{color:#5a4a1f}
 /* sponsors strip */
-.sponsors{background:#efe7d8;border-top:1px solid var(--line);padding:30px 0}
-.sponsors-h{text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
-.sponsor-row{display:flex;flex-wrap:wrap;gap:14px 34px;justify-content:center;align-items:center}
-.sponsor{font-family:Roboto;font-weight:700;font-size:16px;letter-spacing:-.01em;color:#6b6253;opacity:.85}
+.sponsors{background:#fffdf8;border-top:1px solid var(--line);padding:34px 0}
+.sponsors-h{text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
+.sponsor-row{display:flex;flex-wrap:wrap;gap:26px 44px;justify-content:center;align-items:center}
+.sponsor-logo{height:56px;width:auto;max-width:170px;object-fit:contain}
+@media(max-width:560px){.sponsor-logo{height:44px;max-width:130px}.sponsor-row{gap:22px 30px}}
 .oppview-note{font-size:12px;font-weight:700;color:var(--clay)}
 .oppview-score{font-family:Roboto;font-weight:800;font-size:18px;margin-top:4px}
 .lvltag.pend{background:#fff3e0;color:#b8631b}
@@ -697,12 +698,12 @@ const BADGES=[
   {e:"🎾",n:"First Serve",req:"Play 1 TOT match",p:10},
   {e:"👍",n:"Getting Started",req:"Play 3 TOT matches",p:15},
   {e:"👌",n:"The Regular",req:"Play 5 TOT matches",p:20},
-  {e:"🔥",n:"On Fire",req:"Win 3 matches in a row",p:15},
-  {e:"🦖",n:"Giant Killer",req:"Beat a higher-ranked opponent",p:20},
-  {e:"💠",n:"Iron Man",req:"Play 3 matches in 1 week",p:20},
-  {e:"👑",n:"Comeback King",req:"Win after losing the 1st set",p:10},
-  {e:"😌",n:"Mr Reliable",req:"Complete 5 matches without delays",p:20},
-  {e:"🔗",n:"Connector",req:"Invite a friend who plays 1 match",p:10},
+  {e:"🔥",n:"On Fire",req:"Win 3 TOT matches in a row",p:15},
+  {e:"🦖",n:"Giant Killer",req:"Beat a higher ranked opponent",p:20},
+  {e:"💠",n:"Iron Man",req:"Play 3 TOT matches in 1 week",p:20},
+  {e:"👑",n:"Comeback King",req:"Win a TOT match after losing the 1st set",p:10},
+  {e:"😌",n:"Mr Reliable",req:"Complete 5 TOT matches without delays",p:20},
+  {e:"🔗",n:"Connector",req:"Invite a friend who completes 1 match",p:10},
   {e:"💬",n:"Social Player",req:"Join the TOT WhatsApp group",p:5},
 ];
 // recent tournament winners (round-robin group winners), for the Results page strip
@@ -713,8 +714,13 @@ const CHAMPIONS=[
   {n:"Hannah Vella",f:"🇲🇹",tour:"Futures 150",tier:"Futures"},
   {n:"Lena Fischer",f:"🇩🇪",tour:"Juniors 100",tier:"Juniors"},
 ];
-const SPONSORS=["Tappwater Malta","Tennis Trade","Nails by Lenna","Uzo Hair"];
-const PRIVACY_URL=""; // paste the real Squarespace privacy-policy URL here to link it from the footer + sign-up
+const SPONSORS=[
+  {n:"Tappwater Malta",img:"assets/sponsors/tappwater.webp"},
+  {n:"Tennis Trade",img:"assets/sponsors/tennis-trade.webp"},
+  {n:"Nails by Lenna",img:"assets/sponsors/nails-by-lenna.webp"},
+  {n:"Uzo Hair",img:"assets/sponsors/uzo-hair.webp"},
+];
+const PRIVACY_URL="https://www.privacypolicies.com/live/ad132522-e41f-4413-a2ac-b9824d3fb257"; // the tour's full privacy policy
 const OPPONENTS=[
   {n:"Diego Santos",f:"🇪🇸",email:"diego.santos@email.com",phone:"+34 612 445 778"},
   {n:"Pierre Dubois",f:"🇫🇷",email:"p.dubois@email.com",phone:"+33 6 12 34 56 78"},
@@ -734,10 +740,10 @@ function seedMembers(){
 }
 
 /* ============ persistent state ============ */
-const KEY="tot_demo_v4";
+const KEY="tot_demo_v5";
 let S=load();
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY))||fresh();if(!s.members)s.members=seedMembers();return s}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:false,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0,members:seedMembers()}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0,members:seedMembers()}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -941,7 +947,8 @@ function renderRanks(){
 function myBadges(){const b=[];if(S.played>=1)b.push('🎾');if(S.played>=3)b.push('👍');if(S.played>=5)b.push('👌');if(S.w>=3)b.push('🔥');return b.join(' ')||'—'}
 function renderLeaderboard(){
   const leg=document.getElementById('badge-legend');
-  if(leg)leg.innerHTML=BADGES.map(bd=>`<div class="badge-card"><span class="badge-e">${bd.e}</span><div class="badge-i"><b>${bd.n}</b><span>${bd.req}</span></div><span class="badge-p">+${bd.p}</span></div>`).join('');
+  if(leg)leg.innerHTML=BADGES.map(bd=>`<div class="badge-card"><span class="badge-e">${bd.e}</span><div class="badge-i"><b>${bd.n}</b><span>${bd.req}</span></div><span class="badge-p">+${bd.p}</span></div>`).join('')
+    +`<div class="badge-card badge-soon"><span class="badge-e">✨</span><div class="badge-i"><b>More coming soon</b><span>New badges are on the way</span></div></div>`;
   const arr=SAMPLE_ACTIVITY.map(p=>({...p}));
   if(S.profile&&S.played>0)arr.push({n:S.profile.first+' '+S.profile.last,f:FLAG[S.profile.country],m:S.played,b:myBadges(),a:S.act,me:true});
   arr.sort((a,b)=>b.a-a.a);
@@ -1074,7 +1081,7 @@ function tourCard(id){
     return `<div class="card ttour">${head}
       <div class="pendbox">
         <div class="pendbox-h">⏳ Waiting for the organiser to approve your entry</div>
-        <p>Pay the €15 entry to the organiser by Revolut or BOV Mobile (+356 79335554). As soon as they confirm your payment and approve you, your round-robin group and your opponents’ contact details appear right here.</p>
+        <p>Pay the €15 entry to the organiser by Revolut or BOV Mobile (+356 79335554). As soon as they confirm your payment and approve you, your round-robin group and your opponents’ contact details appear right here. <a class="demolink" onclick="approveEntry('${id}')">demo: organiser confirms payment and approves</a></p>
       </div>
     </div>`;
   }
@@ -1209,7 +1216,7 @@ let sampleResults=[
 function meName(){return S.profile?`${S.profile.first} ${S.profile.last}`:'You'}
 function renderAdmin(){
   const mine=[];
-  S.matches.forEach((m,idx)=>{if(m.st==='reported'||m.st==='disputed')mine.push({a:meName(),b:m.opp,score:m.score,t:m.tname,st:m.st,ref:idx,you:true})});
+  S.matches.forEach((m,idx)=>{if(m.st==='reported'||m.st==='disputed')mine.push({a:meName(),b:m.opp,score:m.score,t:m.tname,st:m.st,ref:idx,you:true,date:m.date,place:m.place})});
   const all=[...mine,...sampleResults];
   document.getElementById('adm-scores').innerHTML=all.map(r=>{
     const key=(r.a+'|'+r.b).replace(/'/g,'');
@@ -1217,7 +1224,8 @@ function renderAdmin(){
     const editCall=r.ref!=null?`reportScore(${r.ref})`:`orgEditSample('${key}')`;
     const voidCall=r.ref!=null?`orgVoid(${r.ref})`:`voidSample('${key}')`;
     const resolve=r.st==='disputed'?`<button class="btn green sm" onclick="${r.ref!=null?`setStatus(${r.ref},'reported')`:`resolveSample('${key}')`}">Resolve</button>`:'';
-    return `<div class="listrow ${r.you?'mine':''}"><div class="info"><b>${r.a} vs ${r.b}</b><span>${r.score} &middot; ${r.t}${r.you?' &middot; just reported':''}</span></div>
+    const whenWhere=(r.date?' &middot; '+fmtDate(r.date):'')+(r.place?' &middot; '+escH(r.place):'');
+    return `<div class="listrow ${r.you?'mine':''}"><div class="info"><b>${r.a} vs ${r.b}</b><span>${r.score} &middot; ${r.t}${whenWhere}${r.you?' &middot; just reported':''}</span></div>
       <div class="rowacts">${badge}${resolve}<button class="btn line sm" onclick="${editCall}">Edit</button><button class="btn gray sm" onclick="${voidCall}">Void</button></div></div>`;
   }).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No results yet</p>';
   // matches awaiting a result the organiser can log on a player's behalf (offline reports)
@@ -1432,7 +1440,7 @@ function openPrivacy(){
 }
 function renderSponsors(){
   const el=document.getElementById('sponsor-row');
-  if(el)el.innerHTML=SPONSORS.map(s=>`<span class="sponsor">${s}</span>`).join('');
+  if(el)el.innerHTML=SPONSORS.map(s=>`<img class="sponsor-logo" src="${s.img}" alt="${escH(s.n)}" title="${escH(s.n)}" loading="lazy" />`).join('');
 }
 function remind(name){toast(`Reminder sent to <b>${escH(name)}</b> &middot; deadline is coming up`)}
 
