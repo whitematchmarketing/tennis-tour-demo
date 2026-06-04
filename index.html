@@ -480,6 +480,8 @@
 .tab-login{border:1px solid var(--line);color:var(--ink)}
 .tab-login:hover{background:#eef3ef}
 .awaiting-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin:14px 0 2px;padding-top:12px;border-top:1px dashed var(--line)}
+.fillhint{font-size:11.5px;color:var(--muted);margin:1px 0 2px}
+.fillhint.ready{color:var(--green);font-weight:600}
 </style>
 
 <script>
@@ -563,7 +565,7 @@ const OPPONENTS=[
 const KEY="tot_demo_v3";
 let S=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},requireApproval:false,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -639,6 +641,7 @@ function filledOf(t){const m=(t.spots||'').match(/(\d+)\s*\//);return (m?+m[1]:0
 function tcard(t){
   const lvl=t.lvl||levelOf(t.name),num=t.num||numOf(t.name);
   const entered=S.entries.includes(t.id);
+  const left=t.status==='up'?capOf(t)-(filledOf(t)-1):0; // spots remaining after you enter would be left-1
   let action='';
   if(t.status==='up'){
     action=entered
@@ -659,7 +662,7 @@ function tcard(t){
     <div class="body">
       ${top}
       <div class="meta"><span>${t.status==='up'?'Starts':'Dates'}</span><b>${t.status==='up'?t.start:t.start+' - '+t.end}</b></div>
-      ${t.status==='up'?`<div class="meta"><span>Spots filled</span><b>${t.spots}</b></div>`:''}
+      ${t.status==='up'?`<div class="meta"><span>Spots filled</span><b>${t.spots}</b></div><div class="fillhint ${left===1?'ready':''}">${left===1?'1 spot left, your entry completes the group, opponents shown straight away':left+' spots left, your group forms once it fills'}</div>`:''}
       ${elig}
       ${foot}
     </div></div>`;
