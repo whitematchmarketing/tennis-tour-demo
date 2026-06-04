@@ -574,6 +574,7 @@
 .sponsors-h{text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
 .sponsor-row{display:flex;flex-wrap:wrap;gap:26px 44px;justify-content:center;align-items:center}
 .sponsor-logo{height:56px;width:auto;max-width:170px;object-fit:contain}
+.sponsor-name{font-family:Roboto;font-weight:700;font-size:18px;letter-spacing:-.01em;color:#6b6253}
 @media(max-width:560px){.sponsor-logo{height:44px;max-width:130px}.sponsor-row{gap:22px 30px}}
 .oppview-note{font-size:12px;font-weight:700;color:var(--clay)}
 .oppview-score{font-family:Roboto;font-weight:800;font-size:18px;margin-top:4px}
@@ -719,6 +720,8 @@ const SPONSORS=[
   {n:"Tennis Trade",img:"assets/sponsors/tennis-trade.webp"},
   {n:"Nails by Lenna",img:"assets/sponsors/nails-by-lenna.webp"},
   {n:"Uzo Hair",img:"assets/sponsors/uzo-hair.webp"},
+  {n:"Browns",img:"assets/sponsors/browns.webp"},        // drop the real logo here when supplied
+  {n:"Fort Fitness",img:"assets/sponsors/fort-fitness.webp"},
 ];
 const PRIVACY_URL="https://www.privacypolicies.com/live/ad132522-e41f-4413-a2ac-b9824d3fb257"; // the tour's full privacy policy
 const OPPONENTS=[
@@ -1438,9 +1441,10 @@ function openPrivacy(){
     </div>
     <div class="mf">${PRIVACY_URL?`<a class="btn line sm" href="${PRIVACY_URL}" target="_blank" rel="noopener">Read the full policy</a>`:''}<button class="btn green sm" onclick="closeModal()">Got it</button></div>`);
 }
+function sponsorFallback(img){const s=document.createElement('span');s.className='sponsor-name';s.textContent=img.getAttribute('data-name')||'';img.replaceWith(s);}
 function renderSponsors(){
   const el=document.getElementById('sponsor-row');
-  if(el)el.innerHTML=SPONSORS.map(s=>`<img class="sponsor-logo" src="${s.img}" alt="${escH(s.n)}" title="${escH(s.n)}" loading="lazy" />`).join('');
+  if(el)el.innerHTML=SPONSORS.map(s=>`<img class="sponsor-logo" src="${s.img}" alt="${escH(s.n)}" title="${escH(s.n)}" data-name="${escH(s.n)}" loading="lazy" onerror="sponsorFallback(this)" />`).join('');
 }
 function remind(name){toast(`Reminder sent to <b>${escH(name)}</b> &middot; deadline is coming up`)}
 
