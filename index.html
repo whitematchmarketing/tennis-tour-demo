@@ -13,7 +13,7 @@
        cream/sand page, black text, dark-olive deep sections, Roboto */
     --green:#2f6b4a; --green-d:#1d4a31; --olive:#3d4435; --olive-d:#2a3127;
     --clay:#b6603a; --ball:#e9dcc9; --sand:#e7d9cb; --accent:#ece0cf;
-    --ink:#15140f; --muted:#6b655b; --line:#e3d6c4; --bg:#e7d9cb; --card:#fcfaf6;
+    --ink:#15140f; --muted:#6f6657; --line:#e7dccb; --bg:#f3ecdd; --card:#fffdf8;
     --shadow:0 1px 2px rgba(45,33,15,.04),0 8px 22px rgba(45,33,15,.06);
     --shadow-lg:0 14px 44px rgba(45,33,15,.16); --r:16px;
   }
@@ -448,13 +448,33 @@
         </div>
       </div>
     </div>
+
+    <div class="card pad" style="margin-top:16px" id="members-card">
+      <div class="mem-top">
+        <h3 style="font-size:16px;margin:0">Players &amp; members <span class="badge confirm" id="mem-count"></span></h3>
+        <div class="mem-actions">
+          <button class="btn line sm" type="button" onclick="exportMembers()">⤓ Export CSV</button>
+          <label class="btn line sm" style="cursor:pointer;margin:0">⤒ Import CSV<input type="file" accept=".csv,text/csv" onchange="importMembers(this)" hidden /></label>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:6px 0 12px">Everyone who has signed up. Search the list, add a player by hand, or bulk-import the CSV you export from your Google Form responses (Google Forms: Responses → open in Sheets → File → Download → Comma-separated values).</p>
+      <form class="memadd" onsubmit="addMember(event)">
+        <input name="m_name" required placeholder="Full name" />
+        <input name="m_email" type="email" required placeholder="email@address.com" />
+        <select name="m_level"><option value="">Level…</option><option>Juniors</option><option>Futures</option><option>Challengers</option><option>ATP/WTA</option><option>Masters</option></select>
+        <button class="btn green sm" type="submit">Add</button>
+      </form>
+      <input id="memSearch" class="memsearch" oninput="renderMembers()" placeholder="🔎  Search by name or email" />
+      <div id="adm-members"></div>
+      <p class="hint" style="text-align:left;margin-top:10px">GDPR: as organiser you are the data controller. Import only details people agreed to share. <b>Remove</b> honours a deletion request; <b>Export CSV</b> honours a data request.</p>
+    </div>
   </section>
 </div>
 
 <footer><div class="wrap">
   <div class="ftcol"><b>🎾 Tennis Online Tour</b><div style="margin-top:6px">Connect. Compete. Conquer.</div></div>
   <div class="ftcol"><b>Play</b><a onclick="go('tournaments')">Tournaments</a><a onclick="go('rankings')">Rankings</a><a onclick="go('results')">Results</a><a onclick="go('leaderboard')">Activity leaderboard</a></div>
-  <div class="ftcol"><b>Contact</b><a href="mailto:delicatatennis@gmail.com">delicatatennis@gmail.com</a><a>(+356) 79335554</a><div style="margin-top:6px">New tournaments every Saturday</div></div>
+  <div class="ftcol"><b>Contact</b><a href="mailto:delicatatennis@gmail.com">delicatatennis@gmail.com</a><a>(+356) 79335554</a><a onclick="openPrivacy()" style="cursor:pointer">Privacy &amp; your data</a><div style="margin-top:6px">New tournaments every Saturday</div></div>
 </div></footer>
 
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
@@ -468,9 +488,9 @@
 .me.mebanner h3{margin-top:0}
 .me.mebanner .row3{margin:0}
 .ttour{padding:0;overflow:hidden;margin-bottom:16px}
-.ttour-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px;background:#f8faf8;border-bottom:1px solid var(--line)}
+.ttour-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px;background:#f6f1e7;border-bottom:1px solid var(--line)}
 .ttour-name{font-family:Roboto;font-weight:800;font-size:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.lvltag{font-family:Roboto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--green);background:#eaf5ee;padding:3px 8px;border-radius:6px}
+.lvltag{font-family:Roboto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--green);background:#e7efe2;padding:3px 8px;border-radius:6px}
 .ttour-dates{font-size:13px;color:var(--muted);margin-top:4px}
 .guide{border-bottom:1px solid var(--line)}
 .guide summary{cursor:pointer;padding:13px 20px;font-size:13.5px;font-weight:600;color:var(--green);list-style:none;user-select:none}
@@ -495,13 +515,29 @@
 .demo-links a{cursor:pointer;text-decoration:underline}
 .badge.arrange{background:#eef3ef;color:var(--muted)}
 .badge.dispute{background:#fdeaea;color:#c0392b}
-.tab-admin{color:#b8631b;border:1px dashed #e2c09a;margin-left:8px}
-.tab-admin:hover{background:#fbf2e7;color:#8a5a1a}
-.tab-admin.active{background:#7a4a12;color:#fff;border-style:solid;border-color:#7a4a12}
-.admin-banner{background:#fff7ec;border:1px solid #f0d9b5;color:#8a5a1a;border-radius:12px;padding:13px 16px;font-size:13.5px;margin-bottom:22px;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
-.admin-banner b{color:#6b430f}
-.listrow.mine{background:#f3fbf6;box-shadow:inset 3px 0 0 var(--green);padding-left:10px}
-.oppview{background:#f7faf8;border:1px solid var(--line);border-radius:12px;padding:16px}
+.tab-admin{color:var(--olive);border:1px dashed #b9b09a;margin-left:8px}
+.tab-admin:hover{background:#ece6d8;color:var(--olive)}
+.tab-admin.active{background:var(--olive);color:#fff;border-style:solid;border-color:var(--olive)}
+.admin-banner{background:#efe9da;border:1px solid #ddd0bb;color:#5b5546;border-radius:12px;padding:13px 16px;font-size:13.5px;margin-bottom:22px;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+.admin-banner b{color:var(--olive)}
+.listrow.mine{background:#eef4ea;box-shadow:inset 3px 0 0 var(--green);padding-left:10px}
+.oppview{background:#f6f1e7;border:1px solid var(--line);border-radius:12px;padding:16px}
+.consent{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:4px 0 14px;line-height:1.45}
+.consent input{margin-top:2px;flex:none}
+.consent a{color:var(--green);font-weight:600;cursor:pointer;text-decoration:underline}
+.mem-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.mem-actions{display:flex;gap:8px;flex-wrap:wrap}
+.memadd{display:grid;grid-template-columns:1.3fr 1.7fr 1fr auto;gap:8px;align-items:center;margin-bottom:10px}
+.memadd input,.memadd select,.memsearch{font:inherit;font-size:13.5px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;width:100%}
+.memsearch{margin-bottom:12px}
+.memadd input:focus,.memadd select:focus,.memsearch:focus{outline:0;border-color:var(--green)}
+.memlist-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.memlist-row:last-child{border-bottom:0}
+.memlist-row .info{flex:1;min-width:0}
+.memlist-row .info b{font-size:14px}
+.memlist-row .info span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.memlist-row .youtag{font-size:10px;background:var(--green);color:#fff;padding:2px 6px;border-radius:5px;font-weight:700}
+@media(max-width:560px){.memadd{grid-template-columns:1fr 1fr}.memadd button{grid-column:1/-1}}
 .oppview-note{font-size:12px;font-weight:700;color:var(--clay)}
 .oppview-score{font-family:Roboto;font-weight:800;font-size:18px;margin-top:4px}
 .lvltag.pend{background:#fff3e0;color:#b8631b}
@@ -627,11 +663,20 @@ const OPPONENTS=[
   {n:"Marco Borg",f:"🇲🇹",email:"marco.borg@email.com",phone:"+356 7912 3456"},
 ];
 
+/* ============ members / participants seed ============ */
+function seedMembers(){
+  const by={};
+  SAMPLE_PLAYERS.forEach(p=>{by[p.n]={n:p.n,f:p.f,level:p.t,phone:'',
+    email:p.n.toLowerCase().replace(/[^a-z]+/g,'.').replace(/^\.|\.$/g,'')+'@email.com'}});
+  OPPONENTS.forEach(o=>{by[o.n]=Object.assign(by[o.n]||{n:o.n,f:o.f,level:''},{email:o.email,phone:o.phone,f:o.f})});
+  return Object.values(by);
+}
+
 /* ============ persistent state ============ */
-const KEY="tot_demo_v3";
+const KEY="tot_demo_v4";
 let S=load();
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:false,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY))||fresh();if(!s.members)s.members=seedMembers();return s}catch(e){return fresh()}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:false,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0,members:seedMembers()}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -652,7 +697,9 @@ function openLogin(){
       <button class="btn green" style="width:100%;justify-content:center" onclick="sendMagic()">Send me a login link</button>
     </div>`);
 }
+let loginEmail='';
 function sendMagic(){
+  loginEmail=((document.getElementById('li_email')||{}).value||'').trim().toLowerCase();
   openModal(`<div class="mh"><h3>Check your email 📧</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb"><p style="font-size:13.5px;color:var(--muted);margin:0">We sent a secure login link to your email. Open it on any device to reach your tour. No password needed.</p>
     <p class="hint" style="text-align:left;margin-top:12px">Demo: tap below to simulate opening the emailed link.</p></div>
@@ -660,8 +707,11 @@ function sendMagic(){
 }
 function magicIn(){
   closeModal();
-  if(S.profile){go('dash');toast('Logged in &middot; welcome back, '+S.profile.first)}
-  else{go('home');scrollToReg();toast('No account on this email yet &middot; register to create one')}
+  const known=(S.members||[]).find(m=>(m.email||'').toLowerCase()===loginEmail);
+  if(S.profile&&(S.profile.email||'').toLowerCase()===loginEmail){go('dash');toast('Logged in &middot; welcome back, '+S.profile.first);return}
+  if(known){go('dash');toast('Logged in &middot; welcome back, '+known.n.split(' ')[0]);return}
+  if(S.profile){go('dash');toast('Logged in &middot; welcome back, '+S.profile.first);return}
+  go('home');scrollToReg();toast('No account on this email yet &middot; register to create one');
 }
 
 /* ============ register ============ */
@@ -687,8 +737,10 @@ function renderReg(){
     </div>
     <div class="field"><label>Starting level</label>
       <select id="rlvl">${LEVELS.map(l=>`<option ${l==='Challengers'?'selected':''}>${l} (${LEVEL_LABEL[l]})</option>`).join('')}</select></div>
+    <label class="consent"><input type="checkbox" id="rconsent" required />
+      <span>I agree to my name and contact details being stored to run the tour, and shared with my assigned opponents so we can arrange matches. <a onclick="openPrivacy()">Privacy &amp; your data</a></span></label>
     <button class="btn green" style="width:100%;justify-content:center" type="submit">Create my profile</button>
-    <p class="hint">By registering you agree to play at least one ranked match per week.</p>
+    <p class="hint">You can ask the organiser to export or delete your data at any time.</p>
   </form>`;
 }
 function submitReg(e){
@@ -696,6 +748,8 @@ function submitReg(e){
   S.profile={first:rf.value.trim(),last:rl.value.trim(),email:re.value,phone:rp.value,
     country:rc.value,level:rlvl.value.split(' (')[0]};
   S.regApproved=false; // appears in the organiser's New registrations queue
+  upsertMember({n:(rf.value.trim()+' '+rl.value.trim()).trim(),email:re.value,phone:rp.value,
+    level:rlvl.value.split(' (')[0],f:FLAG[rc.value]||'🎾'}); // also lands in the organiser's member list
   save();renderAll();
   toast('Registration sent &middot; pending the organiser’s approval');
 }
@@ -1101,6 +1155,7 @@ function renderAdmin(){
   document.getElementById('reg-count').textContent=(pendingRegs.length+(myReg?1:0))+' new';
   const ajSel=document.getElementById('aj_player');
   if(ajSel)ajSel.innerHTML=(S.profile?`<option value="__me">${meName()} (you)</option>`:'')+SAMPLE_PLAYERS.map(p=>`<option value="${p.n}">${p.n} - ${p.p} pts</option>`).join('');
+  renderMembers();
 }
 function applyAdjust(e){
   e.preventDefault();
@@ -1198,6 +1253,92 @@ document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==
 let tt;function toast(m){const t=document.getElementById('toast');t.innerHTML='🎾 '+m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800)}
 
 /* ============ init ============ */
+/* ============ participants / members ============ */
+function escH(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function upsertMember(m){
+  if(!m||!m.email)return false;
+  S.members=S.members||[];
+  const i=S.members.findIndex(x=>(x.email||'').toLowerCase()===m.email.toLowerCase());
+  if(i>=0){S.members[i]=Object.assign({},S.members[i],m);return false}
+  S.members.push(m);return true;
+}
+function addMember(e){
+  e.preventDefault();
+  const f=e.target,n=f.m_name.value.trim(),email=f.m_email.value.trim(),level=f.m_level.value;
+  if(!n||!email)return;
+  const isNew=upsertMember({n,email,level,phone:'',f:'🎾'});
+  save();renderMembers();f.reset();
+  toast(isNew?('<b>'+escH(n)+'</b> added to members'):('<b>'+escH(n)+'</b> updated'));
+}
+function removeMember(email){
+  S.members=(S.members||[]).filter(x=>(x.email||'').toLowerCase()!==(email||'').toLowerCase());
+  save();renderMembers();toast('Removed &middot; their data is deleted');
+}
+function parseCSVLine(line){
+  const out=[];let cur='',q=false;
+  for(let i=0;i<line.length;i++){const c=line[i];
+    if(q){if(c==='"'){if(line[i+1]==='"'){cur+='"';i++}else q=false}else cur+=c}
+    else if(c==='"')q=true;else if(c===',')  {out.push(cur);cur=''}else cur+=c}
+  out.push(cur);return out.map(s=>s.trim());
+}
+function importMembers(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const lines=String(rd.result||'').split(/\r?\n/).filter(l=>l.trim());
+    const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/, lvlRe=/(juniors|futures|challengers|atp\/wta|atp|wta|masters)/i, phoneRe=/^\+?[\d][\d ()\-]{6,}$/;
+    let added=0;
+    lines.forEach(line=>{
+      const cells=parseCSVLine(line);
+      if(cells.some(c=>/^(timestamp|email|e-mail|name|full name|first name)$/i.test(c))&&!cells.some(c=>emailRe.test(c)))return; // header
+      const email=cells.find(c=>emailRe.test(c));if(!email)return;
+      const name=cells.find(c=>c&&c!==email&&!emailRe.test(c)&&/[a-z]/i.test(c)&&!phoneRe.test(c)&&!/^\d{1,4}[\/-]\d/.test(c)&&!lvlRe.test(c))||email.split('@')[0];
+      const phone=(cells.find(c=>phoneRe.test(c))||'');
+      const lc=cells.find(c=>lvlRe.test(c));
+      const level=lc?(/atp|wta/i.test(lc)?'ATP/WTA':lc.match(lvlRe)[0].replace(/^./,m=>m.toUpperCase())):'';
+      if(upsertMember({n:name,email,phone,level,f:'🎾'}))added++;
+    });
+    save();renderMembers();
+    toast(added?('Imported <b>'+added+'</b> '+(added===1?'member':'members')):'No new rows with an email found');
+  };
+  rd.readAsText(file);input.value='';
+}
+function exportMembers(){
+  const rows=[['Name','Email','Phone','Level']].concat((S.members||[]).map(m=>[m.n||'',m.email||'',m.phone||'',m.level||'']));
+  const csv=rows.map(r=>r.map(v=>/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='tot-members.csv';document.body.appendChild(a);a.click();a.remove();
+  toast('Exported '+((S.members||[]).length)+' members');
+}
+function renderMembers(){
+  const box=document.getElementById('adm-members');if(!box)return;
+  const q=((document.getElementById('memSearch')||{}).value||'').trim().toLowerCase();
+  const all=S.members||[];
+  const list=q?all.filter(m=>((m.n||'')+' '+(m.email||'')).toLowerCase().includes(q)):all;
+  const meEmail=((S.profile&&S.profile.email)||'').toLowerCase();
+  box.innerHTML=list.length?list.map(m=>{
+    const you=meEmail&&(m.email||'').toLowerCase()===meEmail;
+    const safe=(m.email||'').replace(/'/g,'');
+    return `<div class="memlist-row"><span class="flag" style="font-size:18px">${m.f||'🎾'}</span>
+      <div class="info"><b>${escH(m.n)}</b> ${you?'<span class="youtag">you</span>':''}<span>${escH(m.email)}${m.level?' &middot; '+escH(m.level):''}${m.phone?' &middot; '+escH(m.phone):''}</span></div>
+      <button class="btn gray sm" onclick="removeMember('${safe}')">Remove</button></div>`;
+  }).join(''):`<p style="font-size:13px;color:var(--muted);padding:10px 0">${all.length?'No match for that search':'No members yet'}</p>`;
+  const c=document.getElementById('mem-count');if(c)c.textContent=q?(list.length+' of '+all.length):(all.length+' total');
+}
+function openPrivacy(){
+  openModal(`<div class="mh"><h3>Privacy &amp; your data</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb" style="font-size:13.5px;color:var(--ink);line-height:1.6">
+      <p style="margin:0 0 10px"><b>Who runs the tour.</b> Tennis Online Tour (the organiser) is the data controller. Contact: <a href="mailto:delicatatennis@gmail.com" style="color:var(--green)">delicatatennis@gmail.com</a>.</p>
+      <p style="margin:0 0 10px"><b>What we store.</b> Your name, email, phone and playing level, plus your match results and ranking.</p>
+      <p style="margin:0 0 10px"><b>Why.</b> To run your registration and matches (contract) and to send your opponents your contact details each round so you can arrange to play (your consent, given at sign-up).</p>
+      <p style="margin:0 0 10px"><b>Sharing.</b> Only with the opponents you are drawn against. We never sell your data.</p>
+      <p style="margin:0 0 10px"><b>Keeping it.</b> While you play the tour and up to 12 months after, then deleted.</p>
+      <p style="margin:0"><b>Your rights.</b> Ask the organiser any time to see, export or delete your data, or to withdraw consent.</p>
+    </div>
+    <div class="mf"><button class="btn green sm" onclick="closeModal()">Got it</button></div>`);
+}
+
 function renderAll(){renderReg();renderT();renderRtabs();renderRanks();renderResults();renderLeaderboard();renderDash();renderAdmin()}
 renderAll();
 </script>
