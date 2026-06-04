@@ -210,6 +210,7 @@
       <button class="tab" data-v="leaderboard" onclick="go('leaderboard')">Activity</button>
       <button class="tab" data-v="dash" onclick="go('dash')">My Tour</button>
       <button class="tab tab-admin" data-v="admin" onclick="go('admin')">🔒 Organiser</button>
+      <button class="tab tab-login" onclick="openLogin()">Log in</button>
     </nav>
   </div>
 </header>
@@ -225,6 +226,7 @@
         <button class="btn primary" onclick="go('home');scrollToReg()">Register to play →</button>
         <button class="btn ghost" onclick="go('tournaments')">Browse tournaments</button>
       </div>
+      <div style="margin-top:15px;font-size:13.5px;color:#cfeadd">Already registered? <a onclick="openLogin()" style="color:var(--ball);cursor:pointer;font-weight:700;text-decoration:underline">Log in to your tour</a></div>
       <div class="stats">
         <div class="stat"><div class="n">300+</div><div class="l">Players</div></div>
         <div class="stat"><div class="n">5</div><div class="l">Levels</div></div>
@@ -346,9 +348,13 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="card pad">
-          <h3 style="font-size:16px;margin-bottom:4px">Match results <span class="badge confirm" id="conf-count"></span></h3>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Results appear here the moment a player reports them. Resolve any disputes with one tap.</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px">
+            <h3 style="font-size:16px">Match results <span class="badge confirm" id="conf-count"></span></h3>
+            <button class="btn line sm" onclick="orgLogManual()">+ Log result</button>
+          </div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Results appear here the moment a player reports them. If a player tells you offline, log it yourself. Resolve any disputes with one tap.</p>
           <div id="adm-scores"></div>
+          <div id="adm-awaiting"></div>
         </div>
         <div class="card pad">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px">
@@ -470,6 +476,10 @@
 .review-by{font-size:12.5px;color:var(--muted)}
 .rowacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .yourmatch{font-size:10px;font-weight:700;background:var(--green);color:#fff;padding:2px 6px;border-radius:5px;margin-left:6px;text-transform:uppercase;letter-spacing:.03em}
+.demolink{cursor:pointer;text-decoration:underline;color:var(--green);font-weight:600}
+.tab-login{border:1px solid var(--line);color:var(--ink)}
+.tab-login:hover{background:#eef3ef}
+.awaiting-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin:14px 0 2px;padding-top:12px;border-top:1px dashed var(--line)}
 </style>
 
 <script>
@@ -553,7 +563,7 @@ const OPPONENTS=[
 const KEY="tot_demo_v3";
 let S=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -566,6 +576,25 @@ function go(v){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function scrollToReg(){setTimeout(()=>document.getElementById('regblock').scrollIntoView({behavior:'smooth'}),60)}
+function openLogin(){
+  openModal(`<div class="mh"><h3>Log in to your tour</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p style="font-size:13.5px;color:var(--muted);margin:0 0 14px">Players log in with just their email. We send a secure one-time link, so there is no password to remember.</p>
+      <div class="field"><label>Email</label><input id="li_email" type="email" placeholder="you@email.com" value="${(S.profile&&S.profile.email)||''}" /></div>
+      <button class="btn green" style="width:100%;justify-content:center" onclick="sendMagic()">Send me a login link</button>
+    </div>`);
+}
+function sendMagic(){
+  openModal(`<div class="mh"><h3>Check your email 📧</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb"><p style="font-size:13.5px;color:var(--muted);margin:0">We sent a secure login link to your email. Open it on any device to reach your tour. No password needed.</p>
+    <p class="hint" style="text-align:left;margin-top:12px">Demo: tap below to simulate opening the emailed link.</p></div>
+    <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button><button class="btn green sm" onclick="magicIn()">Open my login link →</button></div>`);
+}
+function magicIn(){
+  closeModal();
+  if(S.profile){go('dash');toast('Logged in &middot; welcome back, '+S.profile.first)}
+  else{go('home');scrollToReg();toast('No account on this email yet &middot; register to create one')}
+}
 
 /* ============ register ============ */
 function renderReg(){
@@ -605,6 +634,8 @@ function submitReg(e){
 
 /* ============ tournaments ============ */
 function findT(id){return (S.created||[]).find(x=>x.id===id)||TOURNEYS.find(x=>x.id===id)}
+function capOf(t){const m=(t.spots||'').match(/\/\s*(\d+)/);return m?+m[1]:4}
+function filledOf(t){const m=(t.spots||'').match(/(\d+)\s*\//);return (m?+m[1]:0)+1}
 function tcard(t){
   const lvl=t.lvl||levelOf(t.name),num=t.num||numOf(t.name);
   const entered=S.entries.includes(t.id);
@@ -669,7 +700,8 @@ function doEnter(id){
     S.entries.push(id);
     S.entryStatus=S.entryStatus||{};
     S.entryStatus[id]=S.requireApproval?'pending':'approved';
-    // round-robin group of 4 = 3 opponents = 3 rounds (revealed once approved)
+    S.drawn=S.drawn||{}; S.drawn[id]=filledOf(t)>=capOf(t); // group drawn only once full
+    // round-robin group of 4 = 3 opponents = 3 rounds (revealed once approved AND full)
     const off=S.matches.length;
     for(let r=0;r<3;r++){
       const o=OPPONENTS[(off+r)%OPPONENTS.length];
@@ -680,12 +712,14 @@ function doEnter(id){
   closeModal();renderAll();
   toast(S.requireApproval
     ? `Entered <b>${t.name}</b> &middot; pending the organiser's approval after payment`
-    : `Entered <b>${t.name}</b> &middot; check My Tour for your group`);
+    : (S.drawn[id]?`Entered <b>${t.name}</b> &middot; group full, see My Tour`:`Entered <b>${t.name}</b> &middot; waiting for the group to fill`));
 }
+function setDrawn(id){S.drawn=S.drawn||{};S.drawn[id]=true;save();renderAll();toast('Group full &middot; round drawn &middot; opponents revealed')}
 function withdraw(id){
   S.entries=S.entries.filter(x=>x!==id);
   S.matches=S.matches.filter(m=>m.tid!==id);
   if(S.entryStatus)delete S.entryStatus[id];
+  if(S.drawn)delete S.drawn[id];
   save();renderAll();toast('Withdrawn from tournament');
 }
 
@@ -788,7 +822,8 @@ function renderDash(){
     b.innerHTML=`<div class="card"><div class="empty"><div class="em">🎾</div>
       <h3 style="margin-bottom:6px">No profile yet</h3>
       <p style="margin-bottom:16px">Create your player profile to enter tournaments and report scores.</p>
-      <button class="btn green" onclick="go('home');scrollToReg()">Register to play →</button></div></div>`;
+      <button class="btn green" onclick="go('home');scrollToReg()">Register to play →</button>
+      <div style="margin-top:12px;font-size:13px;color:var(--muted)">Already registered? <a class="demolink" onclick="openLogin()">Log in</a></div></div></div>`;
     return;
   }
   const rank=allPlayers().sort((a,b)=>b.p-a.p).findIndex(p=>p.me)+1;
@@ -831,6 +866,15 @@ function tourCard(id){
       <div class="pendbox">
         <div class="pendbox-h">⏳ Waiting for the organiser to approve your entry</div>
         <p>Pay the €15 entry to the organiser by Revolut or BOV Mobile (+356 79335554). As soon as they confirm your payment and approve you, your round-robin group and your opponents’ contact details appear right here.</p>
+      </div>
+    </div>`;
+  }
+  const drawn=!!(S.drawn&&S.drawn[id]);
+  if(!drawn){
+    return `<div class="card ttour">${head}
+      <div class="pendbox">
+        <div class="pendbox-h">⏳ Waiting for the group to fill — ${filledOf(t)} of ${capOf(t)} players in</div>
+        <p>A tournament runs as a group of ${capOf(t)}. Once it is full and the round-robin is drawn, your 3 opponents and their contact details appear right here. You will be emailed when it starts. <a class="demolink" onclick="setDrawn('${id}')">demo: fill the group and draw the round</a></p>
       </div>
     </div>`;
   }
@@ -959,6 +1003,10 @@ function renderAdmin(){
     return `<div class="listrow ${r.you?'mine':''}"><div class="info"><b>${r.a} vs ${r.b}</b><span>${r.score} &middot; ${r.t}${r.you?' &middot; just reported':''}</span></div>
       <div class="rowacts">${badge}${resolve}<button class="btn line sm" onclick="${editCall}">Edit</button><button class="btn gray sm" onclick="${voidCall}">Void</button></div></div>`;
   }).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No results yet</p>';
+  // matches awaiting a result the organiser can log on a player's behalf (offline reports)
+  const awaiting=[];
+  S.matches.forEach((m,idx)=>{if(m.st==='arrange'&&S.entryStatus&&S.entryStatus[m.tid]==='approved'&&S.drawn&&S.drawn[m.tid])awaiting.push({m,idx})});
+  document.getElementById('adm-awaiting').innerHTML=awaiting.length?`<div class="awaiting-h">Awaiting results — log on a player's behalf</div>`+awaiting.map(x=>`<div class="listrow"><div class="info"><b>${meName()} vs ${x.m.opp}</b><span>Round ${x.m.round} &middot; ${x.m.tname}</span></div><button class="btn line sm" onclick="reportScore(${x.idx})">Log result</button></div>`).join(''):'';
   // tournament entries pending approval (player's own pending + samples)
   const myPending=(S.entries||[]).filter(id=>(S.entryStatus||{})[id]==='pending').map(id=>({n:meName(),f:S.profile?FLAG[S.profile.country]:'🎾',t:(findT(id)||{}).name||'',ref:id,you:true}));
   const ents=[...myPending,...pendingEntries];
@@ -991,6 +1039,22 @@ function applyAdjust(e){
 function resolveSample(key){sampleResults=sampleResults.map(r=>((r.a+'|'+r.b).replace(/'/g,'')===key?{...r,st:'reported'}:r));renderAdmin();toast('Dispute resolved &middot; result stands')}
 function orgVoid(i){const m=S.matches[i];if(!m)return;m.st='arrange';m.score='';m.won=false;recompute();save();renderAll();toast('Result voided &middot; round sent back to be replayed')}
 function voidSample(key){sampleResults=sampleResults.filter(x=>(x.a+'|'+x.b).replace(/'/g,'')!==key);renderAdmin();toast('Result voided')}
+function orgLogManual(){
+  openModal(`<div class="mh"><h3>Log a result</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 12px">For when a player reports to you directly instead of using the app.</p>
+      <div class="two"><div class="field"><label>Winner</label><input id="lm_a" placeholder="Player name" /></div><div class="field"><label>Opponent</label><input id="lm_b" placeholder="Player name" /></div></div>
+      <div class="two"><div class="field"><label>Tournament</label><input id="lm_t" placeholder="e.g. Challengers 200" /></div><div class="field"><label>Score</label><input id="lm_s" placeholder="6-3, 6-4" /></div></div>
+    </div>
+    <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button><button class="btn green sm" onclick="saveLogManual()">Save result</button></div>`);
+}
+function saveLogManual(){
+  const a=document.getElementById('lm_a').value.trim(),b=document.getElementById('lm_b').value.trim();
+  const t=document.getElementById('lm_t').value.trim()||'Tournament',s=document.getElementById('lm_s').value.trim()||'6-3, 6-4';
+  if(!a||!b){toast('Enter both player names');return}
+  sampleResults.unshift({a,b,score:s,t,st:'reported'});
+  closeModal();renderAdmin();toast('Result logged by organiser')
+}
 function orgEditSample(key){
   const r=sampleResults.find(x=>(x.a+'|'+x.b).replace(/'/g,'')===key); if(!r)return;
   openModal(`<div class="mh"><h3>Edit result</h3><button class="x" onclick="closeModal()">×</button></div>
