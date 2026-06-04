@@ -369,12 +369,17 @@
 <!-- ============ ACTIVITY LEADERBOARD ============ -->
 <div class="view" id="view-leaderboard">
   <section class="wrap">
-    <div class="shead"><h2>Activity leaderboard</h2><p>Play more, earn more. Every match you play earns activity points and badges, separate from your ranking points.</p></div>
+    <div class="shead"><h2>Activity leaderboard</h2><p>Play more, earn more. Every match you play earns activity points and badges, separate from your ranking points. Every 100 activity points is a free tournament voucher, and each month the most active player wins a prize.</p></div>
     <div class="card" style="overflow:hidden">
       <table>
         <thead><tr><th class="rk">#</th><th>Player</th><th>Matches</th><th>Badges</th><th style="text-align:right">Activity pts</th></tr></thead>
         <tbody id="lbody"></tbody>
       </table>
+    </div>
+
+    <div class="badges-wrap">
+      <div class="shead" style="margin-top:38px"><h2 style="font-size:21px">What the badges mean</h2><p>Earn these by playing and winning matches. Activity points reset monthly, badges reset weekly, and you can hold one of each at a time.</p></div>
+      <div class="badge-grid" id="badge-legend"></div>
     </div>
   </section>
 </div>
@@ -476,6 +481,11 @@
   </section>
 </div>
 
+<section class="sponsors"><div class="wrap">
+  <div class="sponsors-h">Our partners &amp; sponsors</div>
+  <div class="sponsor-row" id="sponsor-row"></div>
+</div></section>
+
 <footer><div class="wrap">
   <div class="ftcol"><b>🎾 Tennis Online Tour</b><div style="margin-top:6px">Connect. Compete. Conquer.</div></div>
   <div class="ftcol"><b>Play</b><a onclick="go('tournaments')">Tournaments</a><a onclick="go('rankings')">Rankings</a><a onclick="go('results')">Results</a><a onclick="go('leaderboard')">Activity leaderboard</a></div>
@@ -543,6 +553,27 @@
 .memlist-row .info span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .memlist-row .youtag{font-size:10px;background:var(--green);color:#fff;padding:2px 6px;border-radius:5px;font-weight:700}
 @media(max-width:560px){.memadd{grid-template-columns:1fr 1fr}.memadd button{grid-column:1/-1}}
+/* badge legend */
+.badge-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.badge-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.badge-e{font-size:24px;line-height:1;flex:none}
+.badge-i{flex:1;min-width:0}
+.badge-i b{font-size:14px;display:block}
+.badge-i span{font-size:12px;color:var(--muted)}
+.badge-p{font-size:12px;font-weight:700;color:var(--green);background:#e7efe2;padding:3px 9px;border-radius:999px;flex:none}
+@media(max-width:560px){.badge-grid{grid-template-columns:1fr}}
+/* flash match */
+.pill.flash{background:#f3d24a;color:#5a4500}
+.tcard.isflash .top{background:linear-gradient(120deg,#b6603a,#caa23a)}
+/* reminder banner (My Tour) */
+.remind{display:flex;gap:12px;align-items:flex-start;background:#fbf3df;border:1px solid #ecdcae;color:#6b5a2a;border-radius:12px;padding:13px 16px;margin-top:16px;font-size:13.5px;line-height:1.5}
+.remind-i{font-size:18px;flex:none}
+.remind b{color:#5a4a1f}
+/* sponsors strip */
+.sponsors{background:#efe7d8;border-top:1px solid var(--line);padding:30px 0}
+.sponsors-h{text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.sponsor-row{display:flex;flex-wrap:wrap;gap:14px 34px;justify-content:center;align-items:center}
+.sponsor{font-family:Roboto;font-weight:700;font-size:16px;letter-spacing:-.01em;color:#6b6253;opacity:.85}
 .oppview-note{font-size:12px;font-weight:700;color:var(--clay)}
 .oppview-score{font-family:Roboto;font-weight:800;font-size:18px;margin-top:4px}
 .lvltag.pend{background:#fff3e0;color:#b8631b}
@@ -607,6 +638,7 @@ function numOf(name){const m=name.match(/(\d{2,4})/);return m?+m[1]:100}
 function eligibleLevels(lvl){const i=LEVELS.indexOf(lvl);return LEVELS.filter((_,j)=>Math.abs(j-i)<=1)}
 function topClass(lvl){return{Juniors:"jr",Futures:"clay",Challengers:"clay","ATP/WTA":"atp",Masters:"masters"}[lvl]}
 function winPts(name){return Math.round(numOf(name)*0.2)} // a confirmed win ≈ runner-up points
+function fmtDate(iso){if(!iso)return'';const p=String(iso).split('-');if(p.length!==3)return iso;const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return (+p[2])+' '+(mo[(+p[1])-1]||'')}
 
 /* ============ real tournaments scraped from tennisonlinetour.com ============ */
 const TOURNEYS=[
@@ -616,6 +648,7 @@ const TOURNEYS=[
   {id:"u3",name:"Challengers 200",status:"up",deadline:"Sat 13 Jun",start:"15 Jun",end:"05 Jul",spots:"1 / 4"},
   {id:"u4",name:"ATP/WTA 250",   status:"up",deadline:"Sat 13 Jun",start:"15 Jun",end:"05 Jul",spots:"2 / 4"},
   {id:"u5",name:"Futures 150",   status:"up",deadline:"Sat 13 Jun",start:"15 Jun",end:"05 Jul",spots:"3 / 4"},
+  {id:"fl1",name:"Flash Match - Challengers",status:"up",deadline:"Wed 11 Jun",start:"11 Jun",end:"",spots:"1 / 2",flash:true},
   // IN PROGRESS (ongoing)
   {id:"o1",name:"ATP/WTA 500",   status:"on",start:"01 Jun",end:"21 Jun",note:"Week 1 of 3"},
   {id:"o2",name:"Challengers 200",status:"on",start:"01 Jun",end:"21 Jun",note:"Week 1 of 3"},
@@ -653,12 +686,35 @@ const SAMPLE_PLAYERS=[
   {n:"Omar Haddad",f:"🇲🇹",t:"Futures",p:640,w:7,l:9,cats:{Futures:440,Juniors:120,Challengers:80}},
 ];
 const SAMPLE_ACTIVITY=[
-  {n:"Hannah Vella",f:"🇲🇹",m:34,b:"🏅🔥⚡",a:680},
-  {n:"Marco Borg",f:"🇲🇹",m:29,b:"🏅🔥",a:580},
-  {n:"Diego Santos",f:"🇪🇸",m:26,b:"🔥⚡",a:520},
-  {n:"Omar Haddad",f:"🇲🇹",m:22,b:"🔥",a:440},
-  {n:"Lena Fischer",f:"🇩🇪",m:18,b:"⚡",a:360},
+  {n:"Hannah Vella",f:"🇲🇹",m:34,b:"🎾 👍 👌 🔥 💠",a:680},
+  {n:"Marco Borg",f:"🇲🇹",m:29,b:"🎾 👍 👌 🔥",a:580},
+  {n:"Diego Santos",f:"🇪🇸",m:26,b:"🎾 👍 👌 💠",a:520},
+  {n:"Omar Haddad",f:"🇲🇹",m:22,b:"🎾 👍 👌",a:440},
+  {n:"Lena Fischer",f:"🇩🇪",m:18,b:"🎾 👍",a:360},
 ];
+// activity badges, exactly as on tennisonlinetour.com/rankings-1-1-1
+const BADGES=[
+  {e:"🎾",n:"First Serve",req:"Play 1 TOT match",p:10},
+  {e:"👍",n:"Getting Started",req:"Play 3 TOT matches",p:15},
+  {e:"👌",n:"The Regular",req:"Play 5 TOT matches",p:20},
+  {e:"🔥",n:"On Fire",req:"Win 3 matches in a row",p:15},
+  {e:"🦖",n:"Giant Killer",req:"Beat a higher-ranked opponent",p:20},
+  {e:"💠",n:"Iron Man",req:"Play 3 matches in 1 week",p:20},
+  {e:"👑",n:"Comeback King",req:"Win after losing the 1st set",p:10},
+  {e:"😌",n:"Mr Reliable",req:"Complete 5 matches without delays",p:20},
+  {e:"🔗",n:"Connector",req:"Invite a friend who plays 1 match",p:10},
+  {e:"💬",n:"Social Player",req:"Join the TOT WhatsApp group",p:5},
+];
+// recent tournament winners (round-robin group winners), for the Results page strip
+const CHAMPIONS=[
+  {n:"Liam O'Connor",f:"🇬🇧",tour:"ATP/WTA 500",tier:"ATP/WTA"},
+  {n:"Sofia Ricci",f:"🇮🇹",tour:"Masters 750",tier:"Masters"},
+  {n:"Pierre Dubois",f:"🇫🇷",tour:"Challengers 200",tier:"Challengers"},
+  {n:"Hannah Vella",f:"🇲🇹",tour:"Futures 150",tier:"Futures"},
+  {n:"Lena Fischer",f:"🇩🇪",tour:"Juniors 100",tier:"Juniors"},
+];
+const SPONSORS=["Tappwater Malta","Tennis Trade","Nails by Lenna","Uzo Hair"];
+const PRIVACY_URL=""; // paste the real Squarespace privacy-policy URL here to link it from the footer + sign-up
 const OPPONENTS=[
   {n:"Diego Santos",f:"🇪🇸",email:"diego.santos@email.com",phone:"+34 612 445 778"},
   {n:"Pierre Dubois",f:"🇫🇷",email:"p.dubois@email.com",phone:"+33 6 12 34 56 78"},
@@ -783,12 +839,14 @@ function tcard(t){
   const foot=t.status==='up'
     ? `<div class="foot"><span class="fee">€15 <span>entry</span></span><div style="display:flex;gap:8px;align-items:center">${action}</div></div>`
     : `<div class="foot"><span class="meta" style="margin:0">${t.note||'Completed'}</span>${action}</div>`;
-  return `<div class="card tcard"><div class="top ${topClass(lvl)}"><span class="tier">${t.name}</span>
-    <span class="pill ${t.status}">${t.status==='up'?'Open':t.status==='on'?'Live':'Finished'}</span></div>
+  return `<div class="card tcard ${t.flash?'isflash':''}"><div class="top ${topClass(lvl)}"><span class="tier">${t.flash?'⚡ ':''}${t.name}</span>
+    <span class="pill ${t.flash?'flash':t.status}">${t.flash?'Flash':t.status==='up'?'Open':t.status==='on'?'Live':'Finished'}</span></div>
     <div class="body">
       ${top}
-      <div class="meta"><span>${t.status==='up'?'Starts':'Dates'}</span><b>${t.status==='up'?t.start:t.start+' - '+t.end}</b></div>
-      ${t.status==='up'?`<div class="meta"><span>Spots filled</span><b>${t.spots}</b></div><div class="fillhint ${left===1?'ready':''}">${left===1?'1 spot left, your entry completes the group, opponents shown straight away':left+' spots left, your group forms once it fills'}</div>`:''}
+      <div class="meta"><span>${t.status==='up'?(t.flash?'Play by':'Starts'):'Dates'}</span><b>${t.status==='up'?t.start:t.start+' - '+t.end}</b></div>
+      ${t.status==='up'?(t.flash
+        ?`<div class="meta"><span>Players</span><b>${t.spots}</b></div><div class="fillhint ready">⚡ A quick single match, one v one. Your opponent shows as soon as you enter.</div>`
+        :`<div class="meta"><span>Spots filled</span><b>${t.spots}</b></div><div class="fillhint ${left===1?'ready':''}">${left===1?'1 spot left, your entry completes the group, opponents shown straight away':left+' spots left, your group forms once it fills'}</div>`):''}
       ${elig}
       ${foot}
     </div></div>`;
@@ -813,9 +871,9 @@ function openEntry(id){
   const ok=eligibleLevels(lvl).includes(S.profile.level);
   openModal(`<div class="mh"><h3>Enter ${t.name}?</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
-      <div class="kv"><span>Format</span><b>4 players, round robin</b></div>
-      <div class="kv"><span>Schedule</span><b>1 match per week</b></div>
-      <div class="kv"><span>Starts</span><b>${t.start}</b></div>
+      <div class="kv"><span>Format</span><b>${t.flash?'Flash match, one v one':'4 players, round robin'}</b></div>
+      <div class="kv"><span>Schedule</span><b>${t.flash?'Single match, play by '+t.start:'1 match per week'}</b></div>
+      <div class="kv"><span>${t.flash?'Play by':'Starts'}</span><b>${t.start}</b></div>
       <div class="kv"><span>Entry deadline</span><b>${t.deadline}</b></div>
       <div class="kv"><span>Entry fee</span><b>€15 (Revolut / BOV)</b></div>
       <div class="kv"><span>Your level</span><b>${S.profile.level} ${ok?'✓ eligible':'⚠ outside range'}</b></div>
@@ -831,11 +889,11 @@ function doEnter(id){
     S.entryStatus=S.entryStatus||{};
     S.entryStatus[id]=S.requireApproval?'pending':'approved';
     S.drawn=S.drawn||{}; S.drawn[id]=filledOf(t)>=capOf(t); // group drawn only once full
-    // round-robin group of 4 = 3 opponents = 3 rounds (revealed once approved AND full)
-    const off=S.matches.length;
-    for(let r=0;r<3;r++){
+    // round-robin group of 4 = 3 opponents = 3 rounds; a flash match is a single 1 v 1
+    const off=S.matches.length, n=t.flash?1:3;
+    for(let r=0;r<n;r++){
       const o=OPPONENTS[(off+r)%OPPONENTS.length];
-      S.matches.push({tid:id,tname:t.name,round:r+1,opp:o.n,f:o.f,email:o.email,phone:o.phone,st:"arrange",score:"",won:false});
+      S.matches.push({tid:id,tname:t.name,round:r+1,opp:o.n,f:o.f,email:o.email,phone:o.phone,st:"arrange",score:"",won:false,flash:!!t.flash});
     }
     save();
   }
@@ -880,9 +938,12 @@ function renderRanks(){
     <td class="wl">${p.w} - ${p.l}</td>
     <td class="pts">${p.shown.toLocaleString()}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">No points in ${curTier} yet</td></tr>`;
 }
+function myBadges(){const b=[];if(S.played>=1)b.push('🎾');if(S.played>=3)b.push('👍');if(S.played>=5)b.push('👌');if(S.w>=3)b.push('🔥');return b.join(' ')||'—'}
 function renderLeaderboard(){
+  const leg=document.getElementById('badge-legend');
+  if(leg)leg.innerHTML=BADGES.map(bd=>`<div class="badge-card"><span class="badge-e">${bd.e}</span><div class="badge-i"><b>${bd.n}</b><span>${bd.req}</span></div><span class="badge-p">+${bd.p}</span></div>`).join('');
   const arr=SAMPLE_ACTIVITY.map(p=>({...p}));
-  if(S.profile&&S.played>0)arr.push({n:S.profile.first+' '+S.profile.last,f:FLAG[S.profile.country],m:S.played,b:S.played>=3?"🔥":"⚡",a:S.act,me:true});
+  if(S.profile&&S.played>0)arr.push({n:S.profile.first+' '+S.profile.last,f:FLAG[S.profile.country],m:S.played,b:myBadges(),a:S.act,me:true});
   arr.sort((a,b)=>b.a-a.a);
   document.getElementById('lbody').innerHTML=arr.map((p,i)=>`<tr class="${p.me?'me-row':''}">
     <td class="rk ${i<3?'g':''}">${i+1}</td>
@@ -893,14 +954,14 @@ function renderLeaderboard(){
 /* ============ results feed ============ */
 const TIER_COLOR={Juniors:'#3f8f4f',Futures:'#d8632e',Challengers:'#0d5c3a','ATP/WTA':'#1f86c4',Masters:'#3a4b78'};
 const RESULTS=[
-  {tour:"ATP/WTA 500",tier:"ATP/WTA",round:"Final",date:"17 May",p1:{n:"Liam O'Connor",f:"🇬🇧"},p2:{n:"Pierre Dubois",f:"🇫🇷"},sets:[[7,6],[3,6],[7,5]],h2h:[3,2],up:21,wow:4,review:"Match of the season. Three sets of brilliant tennis and great spirit."},
-  {tour:"Masters 750",tier:"Masters",round:"Final",date:"17 May",p1:{n:"Sofia Ricci",f:"🇮🇹"},p2:{n:"Liam O'Connor",f:"🇬🇧"},sets:[[7,5],[6,4]],h2h:[4,3],up:18,wow:2,review:"Top match, fair line calls and a brutal forehand. Always a pleasure."},
-  {tour:"Futures 150",tier:"Futures",round:"Final",date:"31 May",p1:{n:"Hannah Vella",f:"🇲🇹"},p2:{n:"Diego Santos",f:"🇪🇸"},sets:[[7,6],[6,4]],h2h:[1,1],up:11,wow:3,review:"Tight first-set tiebreak decided it. Friendly, sporting match."},
-  {tour:"Challengers 200",tier:"Challengers",round:"Final",date:"10 May",p1:{n:"Pierre Dubois",f:"🇫🇷"},p2:{n:"Alessandro Conti",f:"🇮🇹"},sets:[[6,3],[4,6],[10,7]],h2h:[2,2],up:14,wow:1,review:"Great fight, went to a deciding match tiebreak. Super sporting."},
-  {tour:"Juniors 100",tier:"Juniors",round:"Final",date:"03 May",p1:{n:"Lena Fischer",f:"🇩🇪"},p2:{n:"Yuki Tanaka",f:"🇯🇵"},sets:[[6,4],[3,6],[10,8]],h2h:[2,1],up:7,wow:2,review:"What a decider. Both have a bright future, lovely to play."},
-  {tour:"ATP/WTA 250",tier:"ATP/WTA",round:"Semi-final",date:"15 May",p1:{n:"Sofia Ricci",f:"🇮🇹"},p2:{n:"Hannah Vella",f:"🇲🇹"},sets:[[6,2],[6,3]],h2h:[3,0],up:9,wow:0,review:"Clinical from Sofia. Hannah fought hard in the second set."},
-  {tour:"Challengers 175",tier:"Challengers",round:"Quarter-final",date:"10 May",p1:{n:"Alessandro Conti",f:"🇮🇹"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,1],[6,2]],h2h:[1,0],up:5,wow:0,review:"Strong serving day. Omar never stopped competing."},
-  {tour:"Futures 125",tier:"Futures",round:"Semi-final",date:"31 May",p1:{n:"Diego Santos",f:"🇪🇸"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,4],[6,4]],h2h:[2,1],up:6,wow:1,review:"Solid baseline battle, great sportsmanship throughout."},
+  {tour:"ATP/WTA 500",tier:"ATP/WTA",round:"Round 3",date:"17 May",place:"Marsa Sports Club",p1:{n:"Liam O'Connor",f:"🇬🇧"},p2:{n:"Pierre Dubois",f:"🇫🇷"},sets:[[7,6],[3,6],[7,5]],h2h:[3,2],up:21,wow:4,review:"Match of the season. Three sets of brilliant tennis and great spirit."},
+  {tour:"Masters 750",tier:"Masters",round:"Round 3",date:"17 May",place:"Vivendo Tennis, Kalkara",p1:{n:"Sofia Ricci",f:"🇮🇹"},p2:{n:"Liam O'Connor",f:"🇬🇧"},sets:[[7,5],[6,4]],h2h:[4,3],up:18,wow:2,review:"Top match, fair line calls and a brutal forehand. Always a pleasure."},
+  {tour:"Futures 150",tier:"Futures",round:"Round 3",date:"31 May",p1:{n:"Hannah Vella",f:"🇲🇹"},p2:{n:"Diego Santos",f:"🇪🇸"},sets:[[7,6],[6,4]],h2h:[1,1],up:11,wow:3,review:"Tight first-set tiebreak decided it. Friendly, sporting match."},
+  {tour:"Challengers 200",tier:"Challengers",round:"Round 3",date:"10 May",p1:{n:"Pierre Dubois",f:"🇫🇷"},p2:{n:"Alessandro Conti",f:"🇮🇹"},sets:[[6,3],[4,6],[10,7]],h2h:[2,2],up:14,wow:1,review:"Great fight, went to a deciding match tiebreak. Super sporting."},
+  {tour:"Juniors 100",tier:"Juniors",round:"Round 3",date:"03 May",p1:{n:"Lena Fischer",f:"🇩🇪"},p2:{n:"Yuki Tanaka",f:"🇯🇵"},sets:[[6,4],[3,6],[10,8]],h2h:[2,1],up:7,wow:2,review:"What a decider. Both have a bright future, lovely to play."},
+  {tour:"ATP/WTA 250",tier:"ATP/WTA",round:"Round 2",date:"15 May",p1:{n:"Sofia Ricci",f:"🇮🇹"},p2:{n:"Hannah Vella",f:"🇲🇹"},sets:[[6,2],[6,3]],h2h:[3,0],up:9,wow:0,review:"Clinical from Sofia. Hannah fought hard in the second set."},
+  {tour:"Challengers 175",tier:"Challengers",round:"Round 1",date:"10 May",p1:{n:"Alessandro Conti",f:"🇮🇹"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,1],[6,2]],h2h:[1,0],up:5,wow:0,review:"Strong serving day. Omar never stopped competing."},
+  {tour:"Futures 125",tier:"Futures",round:"Round 2",date:"31 May",p1:{n:"Diego Santos",f:"🇪🇸"},p2:{n:"Omar Haddad",f:"🇲🇹"},sets:[[6,4],[6,4]],h2h:[2,1],up:6,wow:1,review:"Solid baseline battle, great sportsmanship throughout."},
 ];
 let resTier="All",FEED=[];
 function setline(sets,who){return sets.map(s=>`<span>${s[who]}</span>`).join('')}
@@ -911,19 +972,19 @@ function playerResultCards(){
     const raw=(m.score||'').split(', ').filter(Boolean).map(s=>s.replace(/[\[\]]/g,'').split('-').map(Number));
     const p1=m.won?{n:yn,f:yf}:{n:m.opp,f:m.f}, p2=m.won?{n:m.opp,f:m.f}:{n:yn,f:yf};
     const sets=m.won?raw:raw.map(s=>[s[1],s[0]]);
-    return {tour:m.tname,tier:levelOf(m.tname)||'Challengers',round:'Round '+m.round,date:'Just now',p1,p2,sets,h2h:[1,0],up:m.up||0,wow:0,review:'Reported through the app.',you:true};
+    return {tour:m.tname,tier:levelOf(m.tname)||'Challengers',round:m.flash?'Flash match':'Round '+m.round,date:m.date?fmtDate(m.date):'Just now',place:m.place||'',p1,p2,sets,h2h:[1,0],up:m.up||0,wow:0,review:'Reported through the app.',you:true};
   });
 }
 function renderResults(){
   FEED=[...playerResultCards(),...RESULTS];
-  document.getElementById('champs').innerHTML=RESULTS.filter(m=>m.round==='Final').map(m=>`<div class="champ"><div class="cup" style="background:${TIER_COLOR[m.tier]}">🏆</div><div class="champ-i"><b>${m.p1.f} ${m.p1.n}</b><span>${m.tour}</span></div></div>`).join('');
+  document.getElementById('champs').innerHTML=CHAMPIONS.map(m=>`<div class="champ"><div class="cup" style="background:${TIER_COLOR[m.tier]}">🏆</div><div class="champ-i"><b>${m.f} ${m.n}</b><span>${m.tour}</span></div></div>`).join('');
   document.getElementById('restabs').innerHTML=["All",...LEVELS].map(t=>`<button class="rtab ${t===resTier?'active':''}" onclick="resTier='${t}';renderResults()">${t}</button>`).join('');
   const list=FEED.map((m,i)=>({m,i})).filter(x=>resTier==='All'||x.m.tier===resTier);
   document.getElementById('resfeed').innerHTML=list.map(x=>resCard(x.m,x.i)).join('')||'<p style="color:var(--muted);padding:14px 0">No results in this category yet.</p>';
 }
 function resCard(m,i){
   return `<div class="rescard" onclick="matchDetail(${i})">
-    <div class="res-top"><span class="res-tour"><span class="tdot" style="background:${TIER_COLOR[m.tier]}"></span>${m.tour} &middot; ${m.round}${m.you?' <span class="yourmatch">Your match</span>':''}</span><span class="res-date">${m.date}</span></div>
+    <div class="res-top"><span class="res-tour"><span class="tdot" style="background:${TIER_COLOR[m.tier]}"></span>${m.tour} &middot; ${m.round}${m.you?' <span class="yourmatch">Your match</span>':''}</span><span class="res-date">${m.date}${m.place?' &middot; '+m.place:''}</span></div>
     <div class="pl winner"><span class="flag">${m.p1.f}</span><b>${m.p1.n}</b><span class="setline">${setline(m.sets,0)}</span><span class="wtick">✓</span></div>
     <div class="pl"><span class="flag">${m.p2.f}</span><span>${m.p2.n}</span><span class="setline">${setline(m.sets,1)}</span><span class="wtick">✓</span></div>
     <div class="res-foot"><span class="h2h">Head-to-head ${m.h2h[0]}-${m.h2h[1]}</span>
@@ -938,6 +999,8 @@ function matchDetail(i){
       <div class="pl winner" style="padding:7px 0"><span class="flag">${m.p1.f}</span><b>${m.p1.n}</b><span class="setline">${setline(m.sets,0)}</span><span class="wtick">✓</span></div>
       <div class="pl" style="padding:7px 0"><span class="flag">${m.p2.f}</span><span>${m.p2.n}</span><span class="setline">${setline(m.sets,1)}</span><span class="wtick">✓</span></div>
       <div class="kv" style="margin-top:12px"><span>Final score</span><b>${score}</b></div>
+      ${m.place?`<div class="kv"><span>Where</span><b>${m.place}</b></div>`:''}
+      ${m.date&&m.date!=='Just now'?`<div class="kv"><span>When</span><b>${m.date}</b></div>`:''}
       <div class="kv"><span>Head-to-head</span><b>${m.p1.n.split(' ')[0]} ${m.h2h[0]} - ${m.h2h[1]} ${m.p2.n.split(' ')[0]}</b></div>
       <div class="review"><div class="review-h">⭐ Opponent review &middot; fair play</div><p>“${m.review}”</p><div class="review-by">— ${m.p2.n}</div></div>
     </div>
@@ -982,24 +1045,28 @@ function renderDash(){
       <div><div class="n">${S.w}-${S.l}</div><div class="l">Win-Loss</div></div>
     </div>
   </div>`;
+  // reminder for matches still to play in approved + drawn tournaments
+  const due=S.matches.filter(m=>m.st==='arrange'&&((S.entryStatus||{})[m.tid]==='approved')&&((S.drawn||{})[m.tid]));
+  const reminder=due.length?`<div class="remind"><span class="remind-i">⏰</span><div><b>${due.length} ${due.length===1?'match':'matches'} still to play.</b> Arrange and report ${due.length===1?'it':'them'} before the deadline. The tour emails you a reminder a few days before your time runs out.</div></div>`:'';
   const tours=S.entries.length
     ? S.entries.map(tourCard).join('')
     : `<div class="card"><div class="empty"><div class="em">🎾</div>
         <h3 style="margin-bottom:6px">You have not entered a tournament yet</h3>
         <p style="margin-bottom:16px">Enter one to get your round-robin group, opponents and contact details.</p>
         <button class="btn green" onclick="go('tournaments')">Browse tournaments →</button></div></div>`;
-  b.innerHTML=profile+`<div style="margin-top:18px">${tours}</div>`;
+  b.innerHTML=profile+reminder+`<div style="margin-top:18px">${tours}</div>`;
 }
 function tourCard(id){
   const t=findT(id); if(!t) return '';
   const lvl=t.lvl||levelOf(t.name);
   const status=(S.entryStatus&&S.entryStatus[id])||'approved';
+  const isFlash=!!t.flash;
   const rounds=S.matches.map((m,i)=>({m,i})).filter(x=>x.m.tid===id).sort((a,b)=>a.m.round-b.m.round);
-  const done=rounds.filter(x=>x.m.st==='reported'||x.m.st==='confirmed').length;
+  const done=rounds.filter(x=>x.m.st==='reported'||x.m.st==='confirmed').length, total=isFlash?1:3;
   const head=`<div class="ttour-head">
       <div>
-        <div class="ttour-name">${t.name} <span class="lvltag">${LEVEL_LABEL[lvl]}</span>${status==='pending'?' <span class="lvltag pend">Pending approval</span>':''}</div>
-        <div class="ttour-dates">${t.start}${t.end?' - '+t.end:''} &middot; 4-player round robin &middot; ${status==='pending'?'€15 due':'€15 paid &middot; '+done+'/3 results in'}</div>
+        <div class="ttour-name">${isFlash?'⚡ ':''}${t.name} <span class="lvltag">${LEVEL_LABEL[lvl]}</span>${status==='pending'?' <span class="lvltag pend">Pending approval</span>':''}</div>
+        <div class="ttour-dates">${t.start}${t.end?' - '+t.end:''} &middot; ${isFlash?'Flash match, single 1 v 1':'4-player round robin'} &middot; ${status==='pending'?'€15 due':'€15 paid &middot; '+done+'/'+total+' result'+(total>1?'s':'')+' in'}</div>
       </div>
       <button class="btn gray sm" onclick="withdraw('${id}')">Withdraw</button>
     </div>`;
@@ -1022,19 +1089,19 @@ function tourCard(id){
   }
   return `<div class="card ttour">${head}
     <details class="guide">
-      <summary>How to organise your matches + rules</summary>
+      <summary>How to organise your ${isFlash?'match':'matches'} + rules</summary>
       <div class="guide-body">
-        <p>You are in a group of 4 and play each of the other 3 once, one match per week. Message each opponent using their contact details below to agree a day, time and court. Report the score here as soon as you finish. Your opponent is notified and the organiser sees it straight away. If they disagree, they can dispute it.</p>
+        <p>${isFlash?'A flash match is a single one v one. Message your opponent using the contact details below to agree a day, time and court, then report the score here as soon as you finish.':'You are in a group of 4 and play each of the other 3 once, one match per week. Message each opponent using their contact details below to agree a day, time and court. Report the score here as soon as you finish.'} Your opponent is notified and the organiser sees it straight away. If they disagree, they can dispute it.</p>
         <ul>
           <li>2 sets to 6 games. If you each win a set, play a match tiebreak to 10.</li>
-          <li>You have 1 week to arrange and play each round.</li>
+          <li>${isFlash?'Play the match by the deadline shown above.':'You have 1 week to arrange and play each round.'}</li>
           <li>No-show or no contact gives a technical loss. 3 strikes is a 3-week ban.</li>
           <li>If neither player arranges the match, both lose.</li>
         </ul>
       </div>
     </details>
     <div class="rounds">
-      <div class="rounds-h">Your group &middot; rounds 1 to 3</div>
+      <div class="rounds-h">${isFlash?'Your flash match':'Your group &middot; rounds 1 to 3'}</div>
       ${rounds.map(x=>roundRow(x.m,x.i)).join('')}
     </div>
   </div>`;
@@ -1052,11 +1119,13 @@ function roundRow(m,i){
   }else{ // reported = recorded immediately
     badge='<span class="badge confirm">Recorded</span>';
     action=`<button class="btn line sm" onclick="reportScore(${i})">Edit</button>`;
-    extra=`<div class="rscore">${m.won?'You won':'You lost'} ${m.score} &middot; counted in your ranking</div>
+    const when=m.date?fmtDate(m.date):'', where=m.place?escH(m.place):'';
+    const ww=(when||where)?` &middot; ${when}${when&&where?' at ':''}${where}`:'';
+    extra=`<div class="rscore">${m.won?'You won':'You lost'} ${m.score}${ww} &middot; counted in your ranking</div>
       <div class="demo-links">${first} notified &middot; organiser updated &middot; <a onclick="opponentView(${i})">see what ${first} sees</a> &middot; <a onclick="setStatus(${i},'disputed')">demo: ${first} disputes</a></div>`;
   }
   return `<div class="roundrow">
-    <div class="rnd">R${m.round}</div>
+    <div class="rnd">${m.flash?'⚡':'R'+m.round}</div>
     <div class="oppinfo">
       <div class="oppname"><span class="flag">${m.f}</span>${m.opp}</div>
       <div class="oppcontact"><a href="mailto:${m.email}">${m.email}</a><a href="tel:${m.phone.replace(/\s/g,'')}">${m.phone}</a></div>
@@ -1067,7 +1136,7 @@ function roundRow(m,i){
 }
 function reportScore(i){
   const m=S.matches[i],first=m.opp.split(' ')[0];
-  openModal(`<div class="mh"><h3>Round ${m.round} vs ${m.opp}</h3><button class="x" onclick="closeModal()">×</button></div>
+  openModal(`<div class="mh"><h3>${m.flash?'Flash match':'Round '+m.round} vs ${m.opp}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
       <p style="font-size:13px;color:var(--muted);text-align:center;margin:0 0 16px">Enter the games you each won in every set. It counts straight away, ${first} is notified and can dispute, and the organiser gets the result.</p>
       <div class="scoregrid">
@@ -1077,6 +1146,10 @@ function reportScore(i){
         <span class="slbl tbl">Tiebreak</span><input id="tby" inputmode="numeric" placeholder="–"><span class="dash">-</span><input id="tbo" inputmode="numeric" placeholder="–">
       </div>
       <p class="hint">2 sets to 6 games. Only fill the tiebreak (to 10) if you each won a set.</p>
+      <div class="two" style="margin-top:6px">
+        <div class="field"><label>When did you play?</label><input id="m_date" type="date" value="${m.date||''}"></div>
+        <div class="field"><label>Where did you play?</label><input id="m_place" placeholder="Club or court" value="${m.place?escH(m.place):''}"></div>
+      </div>
     </div>
     <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button>
     <button class="btn green sm" onclick="confirmReport(${i})">Send result</button></div>`);
@@ -1095,6 +1168,8 @@ function confirmReport(i){
     won=tby>tbo; score+=`, [${tby}-${tbo}]`;
   }else won=youSets>oppSets;
   m.score=score; m.won=won; m.st='reported';
+  m.date=((document.getElementById('m_date')||{}).value)||'';
+  m.place=(((document.getElementById('m_place')||{}).value)||'').trim();
   recompute(); save(); closeModal(); renderAll();
   toast(`Result recorded &middot; <b>${m.opp.split(' ')[0]}</b> notified, organiser updated`);
 }
@@ -1148,7 +1223,7 @@ function renderAdmin(){
   // matches awaiting a result the organiser can log on a player's behalf (offline reports)
   const awaiting=[];
   S.matches.forEach((m,idx)=>{if(m.st==='arrange'&&S.entryStatus&&S.entryStatus[m.tid]==='approved'&&S.drawn&&S.drawn[m.tid])awaiting.push({m,idx})});
-  document.getElementById('adm-awaiting').innerHTML=awaiting.length?`<div class="awaiting-h">Awaiting results — log on a player's behalf</div>`+awaiting.map(x=>`<div class="listrow"><div class="info"><b>${meName()} vs ${x.m.opp}</b><span>Round ${x.m.round} &middot; ${x.m.tname}</span></div><button class="btn line sm" onclick="reportScore(${x.idx})">Log result</button></div>`).join(''):'';
+  document.getElementById('adm-awaiting').innerHTML=awaiting.length?`<div class="awaiting-h">Awaiting results — remind players or log on their behalf</div><p style="font-size:12px;color:var(--muted);margin:0 0 8px">The tour auto-emails each player a reminder a few days before their deadline. You can also nudge anyone now.</p>`+awaiting.map(x=>`<div class="listrow"><div class="info"><b>${meName()} vs ${x.m.opp}</b><span>${x.m.flash?'Flash match':'Round '+x.m.round} &middot; ${x.m.tname}</span></div><div class="rowacts"><button class="btn gray sm" onclick="remind('${x.m.opp.replace(/'/g,'')}')">Remind</button><button class="btn line sm" onclick="reportScore(${x.idx})">Log result</button></div></div>`).join(''):'';
   // manage tournaments (reschedule)
   const manage=[...(S.created||[]),...TOURNEYS].map(applyEdits).filter(t=>t.status==='up'||t.status==='on');
   const mEl=document.getElementById('adm-manage');
@@ -1353,10 +1428,15 @@ function openPrivacy(){
       <p style="margin:0 0 10px"><b>Keeping it.</b> While you play the tour and up to 12 months after, then deleted.</p>
       <p style="margin:0"><b>Your rights.</b> Ask the organiser any time to see, export or delete your data, or to withdraw consent.</p>
     </div>
-    <div class="mf"><button class="btn green sm" onclick="closeModal()">Got it</button></div>`);
+    <div class="mf">${PRIVACY_URL?`<a class="btn line sm" href="${PRIVACY_URL}" target="_blank" rel="noopener">Read the full policy</a>`:''}<button class="btn green sm" onclick="closeModal()">Got it</button></div>`);
 }
+function renderSponsors(){
+  const el=document.getElementById('sponsor-row');
+  if(el)el.innerHTML=SPONSORS.map(s=>`<span class="sponsor">${s}</span>`).join('');
+}
+function remind(name){toast(`Reminder sent to <b>${escH(name)}</b> &middot; deadline is coming up`)}
 
-function renderAll(){renderReg();renderT();renderRtabs();renderRanks();renderResults();renderLeaderboard();renderDash();renderAdmin()}
+function renderAll(){renderReg();renderT();renderRtabs();renderRanks();renderResults();renderLeaderboard();renderDash();renderAdmin();renderSponsors()}
 renderAll();
 </script>
 </body>
