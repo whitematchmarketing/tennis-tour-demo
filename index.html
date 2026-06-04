@@ -105,6 +105,10 @@
   .rtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
   .rtab{border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;font-size:13px;color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer}
   .rtab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .rank-note{font-size:12.5px;color:var(--muted);margin:-6px 0 14px;max-width:640px}
+  .catbreak{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .catchip{font-size:11px;background:rgba(255,255,255,.14);color:#f2ece0;padding:3px 9px;border-radius:999px}
+  .catchip b{font-weight:700}
   table{width:100%;border-collapse:collapse;font-size:14px}
   th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:11px 16px;border-bottom:1px solid var(--line)}
   td{padding:13px 16px;border-bottom:1px solid var(--line)}
@@ -340,9 +344,10 @@
   <section class="wrap">
     <div class="shead"><h2>Rankings</h2><p>Updated automatically the moment a match is reported. Points count for one year. 1st place earns the tournament's number in points (Challengers 200 = 200 pts).</p></div>
     <div class="rtabs" id="rtabs"></div>
+    <p id="rank-note" class="rank-note"></p>
     <div class="card" style="overflow:hidden">
       <table>
-        <thead><tr><th class="rk">#</th><th>Player</th><th>Level</th><th class="wl">W&nbsp;-&nbsp;L</th><th style="text-align:right">Points</th></tr></thead>
+        <thead><tr><th class="rk">#</th><th>Player</th><th>Level</th><th class="wl">W&nbsp;-&nbsp;L</th><th style="text-align:right" id="pts-th">Points</th></tr></thead>
         <tbody id="rbody"></tbody>
       </table>
     </div>
@@ -636,16 +641,16 @@ const TOURNEYS=[
 
 /* ============ sample tour data ============ */
 const SAMPLE_PLAYERS=[
-  {n:"Sofia Ricci",f:"🇮🇹",t:"ATP/WTA",p:2140,w:31,l:7},
-  {n:"Liam O'Connor",f:"🇬🇧",t:"Masters",p:1980,w:27,l:9},
-  {n:"Alessandro Conti",f:"🇮🇹",t:"Challengers",p:1610,w:22,l:8},
-  {n:"Pierre Dubois",f:"🇫🇷",t:"Challengers",p:1440,w:19,l:10},
-  {n:"Hannah Vella",f:"🇲🇹",t:"Futures",p:1290,w:17,l:9},
-  {n:"Marco Borg",f:"🇲🇹",t:"Challengers",p:1180,w:14,l:6},
-  {n:"Diego Santos",f:"🇪🇸",t:"Futures",p:1040,w:13,l:11},
-  {n:"Lena Fischer",f:"🇩🇪",t:"Juniors",p:880,w:11,l:7},
-  {n:"Yuki Tanaka",f:"🇯🇵",t:"Juniors",p:760,w:9,l:8},
-  {n:"Omar Haddad",f:"🇲🇹",t:"Futures",p:640,w:7,l:9},
+  {n:"Sofia Ricci",f:"🇮🇹",t:"ATP/WTA",p:2140,w:31,l:7,cats:{"ATP/WTA":1500,Masters:400,Challengers:240}},
+  {n:"Liam O'Connor",f:"🇬🇧",t:"Masters",p:1980,w:27,l:9,cats:{Masters:1400,"ATP/WTA":580}},
+  {n:"Alessandro Conti",f:"🇮🇹",t:"Challengers",p:1610,w:22,l:8,cats:{Challengers:1100,"ATP/WTA":300,Futures:210}},
+  {n:"Pierre Dubois",f:"🇫🇷",t:"Challengers",p:1440,w:19,l:10,cats:{Challengers:1000,Futures:260,"ATP/WTA":180}},
+  {n:"Hannah Vella",f:"🇲🇹",t:"Futures",p:1290,w:17,l:9,cats:{Futures:900,Challengers:250,Juniors:140}},
+  {n:"Marco Borg",f:"🇲🇹",t:"Challengers",p:1180,w:14,l:6,cats:{Challengers:820,Futures:240,"ATP/WTA":120}},
+  {n:"Diego Santos",f:"🇪🇸",t:"Futures",p:1040,w:13,l:11,cats:{Futures:720,Challengers:200,Juniors:120}},
+  {n:"Lena Fischer",f:"🇩🇪",t:"Juniors",p:880,w:11,l:7,cats:{Juniors:640,Futures:240}},
+  {n:"Yuki Tanaka",f:"🇯🇵",t:"Juniors",p:760,w:9,l:8,cats:{Juniors:560,Futures:200}},
+  {n:"Omar Haddad",f:"🇲🇹",t:"Futures",p:640,w:7,l:9,cats:{Futures:440,Juniors:120,Challengers:80}},
 ];
 const SAMPLE_ACTIVITY=[
   {n:"Hannah Vella",f:"🇲🇹",m:34,b:"🏅🔥⚡",a:680},
@@ -853,7 +858,7 @@ let curTier="All";
 function allPlayers(){
   const arr=SAMPLE_PLAYERS.map(p=>({...p}));
   if(S.profile){
-    arr.push({n:S.profile.first+' '+S.profile.last,f:FLAG[S.profile.country],t:S.profile.level,p:S.pts,w:S.w,l:S.l,me:true});
+    arr.push({n:S.profile.first+' '+S.profile.last,f:FLAG[S.profile.country],t:S.profile.level,p:S.pts,cats:S.catPts||{},w:S.w,l:S.l,me:true});
   }
   return arr;
 }
@@ -861,13 +866,19 @@ function renderRtabs(){
   document.getElementById('rtabs').innerHTML=["All",...LEVELS].map(t=>`<button class="rtab ${t===curTier?'active':''}" onclick="curTier='${t}';renderRtabs();renderRanks()">${t}</button>`).join('');
 }
 function renderRanks(){
-  const list=allPlayers().sort((a,b)=>b.p-a.p).filter(p=>curTier==='All'||p.t===curTier);
+  const cat=curTier!=='All';
+  // category tab ranks by points earned IN that category (overall = sum of all categories)
+  let list=allPlayers().map(p=>({...p,shown:cat?((p.cats&&p.cats[curTier])||0):p.p}));
+  if(cat)list=list.filter(p=>p.shown>0); // only players who have points in this category
+  list.sort((a,b)=>b.shown-a.shown);
+  const note=document.getElementById('rank-note');
+  if(note)note.textContent=cat?`Showing points earned in ${curTier}. A player's overall total is the sum of every category they have played.`:'Overall ranking — each player’s points added up across every category.';
   document.getElementById('rbody').innerHTML=list.map((p,i)=>`<tr class="${p.me?'me-row':''}">
     <td class="rk ${i<3?'g':''}">${i+1}</td>
     <td><span class="pname"><span class="flag">${p.f}</span>${p.n}${p.me?'<span class="you-tag">YOU</span>':''}</span></td>
     <td style="color:var(--muted);font-size:13px">${p.t}</td>
     <td class="wl">${p.w} - ${p.l}</td>
-    <td class="pts">${p.p.toLocaleString()}</td></tr>`).join('');
+    <td class="pts">${p.shown.toLocaleString()}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">No points in ${curTier} yet</td></tr>`;
 }
 function renderLeaderboard(){
   const arr=SAMPLE_ACTIVITY.map(p=>({...p}));
@@ -935,10 +946,13 @@ function matchDetail(i){
 
 /* ============ my tour ============ */
 function recompute(){
-  let pts=0,w=0,l=0,played=0;
+  let pts=0,w=0,l=0,played=0; const cat={};
   S.matches.forEach(m=>{
-    if(m.st==='reported'||m.st==='confirmed'){played++; if(m.won){pts+=winPts(m.tname);w++;}else{l++;}}
+    if(m.st==='reported'||m.st==='confirmed'){played++;
+      if(m.won){const gain=winPts(m.tname);pts+=gain;w++;const lv=levelOf(m.tname);cat[lv]=(cat[lv]||0)+gain;}
+      else{l++;}}
   });
+  S.catPts=cat; // points earned per category, e.g. {Challengers:800,"ATP/WTA":200}
   S.pts=Math.max(0,pts+(S.adjust||0));S.w=w;S.l=l;S.played=played;S.act=played*20;
 }
 function renderDash(){
@@ -953,11 +967,14 @@ function renderDash(){
   }
   const rank=allPlayers().sort((a,b)=>b.p-a.p).findIndex(p=>p.me)+1;
   const init=((S.profile.first[0]||'')+(S.profile.last[0]||'')).toUpperCase();
+  const cb=Object.entries(S.catPts||{}).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
+  const breakdown=cb.length?`<div class="catbreak">${cb.map(e=>`<span class="catchip">${e[0]} <b>${e[1].toLocaleString()}</b></span>`).join('')}</div>`:'';
   const profile=`<div class="me mebanner">
     <div class="av">${init}</div>
     <div class="meinfo">
       <h3>${S.profile.first} ${S.profile.last} ${FLAG[S.profile.country]}</h3>
       <div class="sub">${S.profile.level} (${LEVEL_LABEL[S.profile.level]})</div>
+      ${breakdown}
     </div>
     <div class="row3">
       <div><div class="n">#${rank}</div><div class="l">Rank</div></div>
