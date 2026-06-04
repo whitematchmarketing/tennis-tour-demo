@@ -330,6 +330,7 @@
     <div class="shead"><h2>Organiser tools</h2><p>Create tournaments, approve entries and see results as they come in. Works like a simple dashboard, no spreadsheets and no code.</p></div>
     <div class="admin-banner">🔒 <div><b>Admin only.</b> This menu is visible to the organiser, not to players. It is shown here in the demo so you can see how you would run the tour. Players only see Home, Tournaments, Rankings, Activity and My Tour.</div></div>
     <div class="adm-grid">
+      <div style="display:flex;flex-direction:column;gap:16px">
       <div class="card pad">
         <h3 style="font-size:16px;margin-bottom:4px">Create a tournament</h3>
         <p style="font-size:13px;color:var(--muted);margin-bottom:15px">Publish it and the round-robin groups build themselves from who enters.</p>
@@ -345,6 +346,12 @@
           </div>
           <button class="btn green" style="width:100%;justify-content:center" type="submit">Publish tournament</button>
         </form>
+      </div>
+      <div class="card pad">
+        <h3 style="font-size:16px;margin-bottom:4px">Manage tournaments</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Reschedule a tournament: push the start if a group has not filled, or set the real dates once all 4 players are in. Players get the new schedule.</p>
+        <div id="adm-manage"></div>
+      </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="card pad">
@@ -482,6 +489,7 @@
 .awaiting-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin:14px 0 2px;padding-top:12px;border-top:1px dashed var(--line)}
 .fillhint{font-size:11.5px;color:var(--muted);margin:1px 0 2px}
 .fillhint.ready{color:var(--green);font-weight:600}
+#adm-manage{max-height:300px;overflow:auto}
 </style>
 
 <script>
@@ -565,7 +573,7 @@ const OPPONENTS=[
 const KEY="tot_demo_v3";
 let S=load();
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},requireApproval:false,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:false,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -635,7 +643,8 @@ function submitReg(e){
 }
 
 /* ============ tournaments ============ */
-function findT(id){return (S.created||[]).find(x=>x.id===id)||TOURNEYS.find(x=>x.id===id)}
+function applyEdits(t){const e=(S.tEdits||{})[t.id];return e?{...t,...e}:t}
+function findT(id){const base=(S.created||[]).find(x=>x.id===id)||TOURNEYS.find(x=>x.id===id);return base?applyEdits(base):base}
 function capOf(t){const m=(t.spots||'').match(/\/\s*(\d+)/);return m?+m[1]:4}
 function filledOf(t){const m=(t.spots||'').match(/(\d+)\s*\//);return (m?+m[1]:0)+1}
 function tcard(t){
@@ -668,11 +677,12 @@ function tcard(t){
     </div></div>`;
 }
 function renderT(){
-  const ups=[...(S.created||[]).filter(t=>t.status==='up'),...TOURNEYS.filter(t=>t.status==='up')];
-  document.getElementById('t-up').innerHTML=ups.map(tcard).join('');
-  document.getElementById('t-on').innerHTML=TOURNEYS.filter(t=>t.status==='on').map(tcard).join('');
-  document.getElementById('t-fin').innerHTML=TOURNEYS.filter(t=>t.status==='fin').map(tcard).join('');
-  document.getElementById('stat-open').textContent=ups.length;
+  const all=[...(S.created||[]),...TOURNEYS].map(applyEdits);
+  const up=all.filter(t=>t.status==='up'), on=all.filter(t=>t.status==='on'), fin=all.filter(t=>t.status==='fin');
+  document.getElementById('t-up').innerHTML=up.map(tcard).join('');
+  document.getElementById('t-on').innerHTML=on.map(tcard).join('');
+  document.getElementById('t-fin').innerHTML=fin.map(tcard).join('');
+  document.getElementById('stat-open').textContent=up.length;
 }
 function openEntry(id){
   const t=findT(id),lvl=t.lvl||levelOf(t.name);
@@ -1010,6 +1020,10 @@ function renderAdmin(){
   const awaiting=[];
   S.matches.forEach((m,idx)=>{if(m.st==='arrange'&&S.entryStatus&&S.entryStatus[m.tid]==='approved'&&S.drawn&&S.drawn[m.tid])awaiting.push({m,idx})});
   document.getElementById('adm-awaiting').innerHTML=awaiting.length?`<div class="awaiting-h">Awaiting results — log on a player's behalf</div>`+awaiting.map(x=>`<div class="listrow"><div class="info"><b>${meName()} vs ${x.m.opp}</b><span>Round ${x.m.round} &middot; ${x.m.tname}</span></div><button class="btn line sm" onclick="reportScore(${x.idx})">Log result</button></div>`).join(''):'';
+  // manage tournaments (reschedule)
+  const manage=[...(S.created||[]),...TOURNEYS].map(applyEdits).filter(t=>t.status==='up'||t.status==='on');
+  const mEl=document.getElementById('adm-manage');
+  if(mEl)mEl.innerHTML=manage.map(t=>`<div class="listrow"><div class="info"><b>${t.name}</b><span>${t.status==='up'?'Opens '+t.start+' &middot; entry '+(t.deadline||'TBC'):'In progress &middot; '+t.start+' - '+t.end}</span></div><button class="btn line sm" onclick="openEditTournament('${t.id}')">Edit dates</button></div>`).join('');
   // tournament entries pending approval (player's own pending + samples)
   const myPending=(S.entries||[]).filter(id=>(S.entryStatus||{})[id]==='pending').map(id=>({n:meName(),f:S.profile?FLAG[S.profile.country]:'🎾',t:(findT(id)||{}).name||'',ref:id,you:true}));
   const ents=[...myPending,...pendingEntries];
@@ -1090,6 +1104,34 @@ function createTourney(e){
   toast(`<b>${t.name}</b> published &middot; now open for entry`);
 }
 function fmtDate(iso){if(!iso)return '';const d=new Date(iso+'T00:00');if(isNaN(d.getTime()))return '';const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]}
+function openEditTournament(id){
+  const t=findT(id); if(!t)return;
+  openModal(`<div class="mh"><h3>Edit ${t.name}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 12px">Reschedule this tournament: push the start if it has not filled, or set the real dates once all 4 players are in. Players are notified of the new schedule.</p>
+      ${t.status==='up'?`<div class="field"><label>Entry deadline</label><input id="et_dl" value="${t.deadline||''}" placeholder="e.g. Sat 13 Jun" /></div>`:''}
+      <div class="two">
+        <div class="field"><label>Start date</label><input id="et_start" value="${t.start||''}" placeholder="e.g. 15 Jun" /></div>
+        <div class="field"><label>End date</label><input id="et_end" value="${t.end||''}" placeholder="e.g. 05 Jul" /></div>
+      </div>
+      <div class="field"><label>Status</label><select id="et_status">
+        <option value="up" ${t.status==='up'?'selected':''}>Open for entry</option>
+        <option value="on" ${t.status==='on'?'selected':''}>In progress</option>
+        <option value="fin" ${t.status==='fin'?'selected':''}>Finished</option>
+      </select></div>
+    </div>
+    <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button><button class="btn green sm" onclick="saveEditTournament('${id}')">Save changes</button></div>`);
+}
+function saveEditTournament(id){
+  S.tEdits=S.tEdits||{};
+  const e={...(S.tEdits[id]||{})};
+  const dl=document.getElementById('et_dl'); if(dl)e.deadline=dl.value.trim();
+  e.start=document.getElementById('et_start').value.trim();
+  e.end=document.getElementById('et_end').value.trim();
+  e.status=document.getElementById('et_status').value;
+  S.tEdits[id]=e; save(); closeModal(); renderAll();
+  toast('Dates updated &middot; players notified of the new schedule');
+}
 
 /* ============ modal + toast ============ */
 function openModal(h){document.getElementById('modal').innerHTML=h;document.getElementById('overlay').classList.add('show')}
