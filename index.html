@@ -405,6 +405,7 @@
 
     <!-- RUN THE TOUR (core operations) -->
     <div class="org-panel" id="op-run">
+    <div class="org-help">🎾 <b>What this menu is:</b> the day-to-day running of your tournaments. <b>How to use it:</b> publish a tournament, approve the players who join, and record each match result as it comes in (or log one yourself). <b>Why it helps:</b> the four-player groups and the rankings build themselves from who enters and who wins, so you stop emailing opponents and editing sheets.</div>
     <div class="adm-grid">
       <div style="display:flex;flex-direction:column;gap:16px">
       <div class="card pad">
@@ -871,7 +872,7 @@ function load(){
 function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0,
   members:seedMembers(),payments:seedPayments(),strikes:seedStrikes(),vouchers:seedVouchers(),audit:seedAudit(),roles:seedRoles(),sentLog:[],
   notif:freshNotif(),content:freshContent(),ptsTable:freshPtsTable(),sponsors:SPONSORS.map(x=>({...x})),badges:BADGES.map(x=>({...x})),announce:'',lastPublished:'Wed 11 Jun'}}
-function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(typeof toast==='function')toast('Browser storage is full · in the live version logos are stored online, not in the browser')}}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
 /* ============ nav ============ */
@@ -1568,7 +1569,9 @@ function openPrivacy(){
 function sponsorFallback(img){const s=document.createElement('span');s.className='sponsor-name';s.textContent=img.getAttribute('data-name')||'';img.replaceWith(s);}
 function renderSponsors(){
   const el=document.getElementById('sponsor-row');
-  if(el)el.innerHTML=(S.sponsors||SPONSORS).map(s=>`<img class="sponsor-logo" src="${s.img}" alt="${escH(s.n)}" title="${escH(s.n)}" data-name="${escH(s.n)}" loading="lazy" onerror="sponsorFallback(this)" />`).join('');
+  if(el)el.innerHTML=(S.sponsors||SPONSORS).map(s=>s.img
+    ?`<img class="sponsor-logo" src="${s.img}" alt="${escH(s.n)}" title="${escH(s.n)}" data-name="${escH(s.n)}" loading="lazy" onerror="sponsorFallback(this)" />`
+    :`<span class="sponsor-name" title="${escH(s.n)}">${escH(s.n)}</span>`).join('');
 }
 function remind(name){toast(`Reminder sent to <b>${escH(name)}</b> &middot; deadline is coming up`)}
 
@@ -1606,7 +1609,7 @@ function seedRoles(){return[
 ]}
 function freshNotif(){return{senderName:"Tennis Online Tour",replyTo:"delicatatennis@gmail.com",leadDays:2,
   events:{regApproved:true,entryPending:true,paymentApproved:true,groupDrawn:true,matchReminder:true,overdue:true,resultReported:true,dispute:true,ranking:true,promo:true}}}
-function freshContent(){return{siteTitle:"Tennis Online Tour",logo:"🎾",heroTitle:"",heroSub:"",rules:"",
+function freshContent(){return{siteTitle:"Tennis Online Tour",logo:"🎾",logoImg:"",heroTitle:"",heroSub:"",rules:"",
   brandOlive:"#1f4d37",brandGreen:"#2f6b4a",
   payInstructions:"Pay €15 by Revolut or BOV Mobile to +356 79335554. Use your full name as the payment reference.",fee:15}}
 function freshPtsTable(){return[
@@ -1689,7 +1692,7 @@ function renderToday(){
     {n:a.bans,ic:'🚫',b:'Active bans',s:'Players currently blocked from entering',go:'disc',cls:a.bans?'bad':''},
   ];
   el.innerHTML=`
-   <div class="org-help">👋 <b>This is your home base.</b> Everything that needs a decision today is below. Tap any line to jump straight to it. Nothing here needs code, a developer or a spreadsheet.</div>
+   <div class="org-help">👋 <b>What this menu is:</b> your daily home screen. <b>How to use it:</b> read the list below and tap any line that has a number on it, the app jumps you straight to where you handle it. <b>Why it helps:</b> everything that needs you sits in one place so nothing slips, and none of it needs code or a spreadsheet.</div>
    <div class="tiles">
      <div class="tile ${a.total?'warn':''}"><div class="tn">${a.total}</div><div class="tl">Need attention</div></div>
      <div class="tile"><div class="tn">€${paidThisMonth()}</div><div class="tl">Paid this month</div></div>
@@ -1718,7 +1721,7 @@ function renderPay(){
   const list=(S.payments||[]).map((p,i)=>({p,i})).filter(x=>f==='all'||x.p.status===f);
   const sum=s=>payNum(s).reduce((a,p)=>a+(p.amount||0),0);
   el.innerHTML=`
-   <div class="org-help">💶 Every €15 entry in one place. Mark who has paid by Revolut or BOV, refund a withdrawal, or comp a guest. No more cross-checking a bank app against a spreadsheet.</div>
+   <div class="org-help">💶 <b>What this menu is:</b> a simple list of who has paid their €15. <b>How to use it:</b> when the money lands in your Revolut or BOV, find the player and tap Mark paid, which releases their group. Refund a withdrawal or comp a guest the same way. <b>Why it helps:</b> you always know who still owes and how much you have taken, without checking your bank app against a spreadsheet.</div>
    <div class="tiles">
      <div class="tile"><div class="tn">€${sum('paid')}</div><div class="tl">Collected</div></div>
      <div class="tile ${outstanding()?'warn':''}"><div class="tn">€${outstanding()}</div><div class="tl">Outstanding</div></div>
@@ -1763,7 +1766,7 @@ function renderDisc(){
   const banned=bannedPlayers();
   const active=(S.strikes||[]).filter(s=>s.status==='active').length;
   el.innerHTML=`
-   <div class="org-help">⚠️ No-shows and no-contact are logged here. Three active strikes and the tour blocks that player from entering for three weeks, automatically. You can excuse a strike or lift a ban any time.</div>
+   <div class="org-help">⚠️ <b>What this menu is:</b> your record of no-shows and players who do not arrange their match. <b>How to use it:</b> type a name and a reason and tap Add strike. <b>Why it helps:</b> at three strikes the tour blocks that player from entering for three weeks on its own, and you can excuse a strike or lift a ban any time, so you never have to remember who has been warned.</div>
    <div class="tiles">
      <div class="tile"><div class="tn">${active}</div><div class="tl">Active strikes</div></div>
      <div class="tile ${banned.length?'bad':''}"><div class="tn">${banned.length}</div><div class="tl">Banned now</div></div>
@@ -1798,7 +1801,7 @@ function liftBan(name){(S.strikes||[]).forEach(s=>{if(s.player.toLowerCase()===n
 function renderRankTools(){
   const el=document.getElementById('op-rank');if(!el)return;
   el.innerHTML=`
-   <div class="org-help">📈 Rankings calculate themselves from results. Here you handle the judgement calls: who moves up a level, what each finish is worth, when points expire, and the weekly publish.</div>
+   <div class="org-help">📈 <b>What this menu is:</b> the few ranking decisions only you can make. <b>How to use it:</b> when the tour suggests a player should move up or down, tap Promote, Relegate or Defer; set the points each finish is worth; and tap Publish each Wednesday. <b>Why it helps:</b> the rankings add themselves up from results, so you only confirm the big calls instead of editing a sheet every week.</div>
    <div class="setblock">
      <h3>Level decisions ${PROMO_PROMPTS.length?`<span class="badge wait">${PROMO_PROMPTS.length} to review</span>`:''}</h3>
      <div class="sub">The tour flags players who hit the promotion or relegation rule. Approve or defer with one tap.</div>
@@ -1837,7 +1840,7 @@ function renderMsg(){
   const ev=S.notif.events;
   const evLabels={regApproved:'Registration approved',entryPending:'Entry received, pay €15',paymentApproved:'Payment confirmed, group released',groupDrawn:'Group drawn, here are your opponents',matchReminder:'Match reminder before deadline',overdue:'Match overdue',resultReported:'Result reported, confirm or dispute',dispute:'A result was disputed',ranking:'Weekly rankings published',promo:'You levelled up or down'};
   el.innerHTML=`
-   <div class="org-help">✉️ This replaces the manual emailing. Write once and send to the right group, or let the tour send the routine emails for you. (In the demo a send shows a confirmation; live, real emails go out.)</div>
+   <div class="org-help">✉️ <b>What this menu is:</b> how you talk to your players. <b>How to use it:</b> pick who it goes to, write the message (tap a grey chip to drop in each player's name or deadline) and send, or simply leave the automatic emails switched on. <b>Why it helps:</b> it replaces all the manual emailing of opponents and reminders. (In this demo a send shows a confirmation; on the live site real emails go out.)</div>
    <div class="setblock">
      <h3>Send a message</h3><div class="sub">Pick who it goes to, write it, send. Tap a chip to drop in each player's own details.</div>
      <div class="compose-grid">
@@ -1882,7 +1885,7 @@ function saveNotif(){S.notif.senderName=document.getElementById('nt_sender').val
 function renderLoy(){
   const el=document.getElementById('op-loy');if(!el)return;
   el.innerHTML=`
-   <div class="org-help">🎁 The "play more, earn more" side of the tour. Track free-entry vouchers, edit the badges and what they reward, and pick the monthly prize winner.</div>
+   <div class="org-help">🎁 <b>What this menu is:</b> the rewards that keep players active. <b>How to use it:</b> issue a free-entry voucher when someone reaches 100 activity points, pick the monthly prize winner, and edit the badges and their points. <b>Why it helps:</b> it runs your "play more, earn more" idea for you and keeps players coming back, with nothing to track by hand.</div>
    <div class="setblock">
      <h3>Free-entry vouchers</h3><div class="sub">Earned at 100 activity points. Issue one, or mark it used against an entry.</div>
      <div style="overflow:auto"><table class="ledger"><thead><tr><th>Player</th><th>Reason</th><th>Status</th><th>Date</th><th></th></tr></thead>
@@ -1911,10 +1914,16 @@ function renderContent(){
   const el=document.getElementById('op-content');if(!el)return;
   const c=S.content;
   el.innerHTML=`
-   <div class="org-help">🎨 Change what players read and see, with no code. Edits apply to the live site. (In the demo they apply to this preview.)</div>
+   <div class="org-help">🎨 <b>What this menu is:</b> the look and words of your site. <b>How to use it:</b> type a new title, upload a logo, pick your colours, edit the homepage and rules, or add a sponsor and upload its logo, then tap the Save button under each box. <b>Why it helps:</b> you change anything on the site yourself in seconds, so you never wait on a developer. (In this demo the changes show in this preview.)</div>
    <div class="setblock">
      <h3>Brand</h3><div class="sub">Your name, logo and colours.</div>
      <div class="two"><div class="field"><label>Site title</label><input id="c_title" value="${escH(c.siteTitle)}"></div><div class="field"><label>Logo (emoji)</label><input id="c_logo" value="${escH(c.logo)}" maxlength="3"></div></div>
+     <div class="field"><label>Or upload a logo image</label>
+       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+         <label class="btn line sm" style="cursor:pointer;margin:0">${c.logoImg?'Replace':'Upload'} logo image<input type="file" accept="image/*" hidden onchange="uploadBrandLogo(this)"></label>
+         ${c.logoImg?`<img src="${c.logoImg}" style="height:30px;width:auto;max-width:130px;object-fit:contain;border:1px solid var(--line);border-radius:6px;padding:2px;background:#fff"><button class="btn gray sm" onclick="clearBrandLogo()">Remove image</button>`:'<span style="font-size:12px;color:var(--muted)">Any size works, it is resized to fit. Uses the emoji until you upload one.</span>'}
+       </div>
+     </div>
      <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-top:4px">
        <label style="font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center">Deep colour <input type="color" class="swatch" id="c_olive" value="${c.brandOlive}"></label>
        <label style="font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center">Accent green <input type="color" class="swatch" id="c_green" value="${c.brandGreen}"></label>
@@ -1934,8 +1943,9 @@ function renderContent(){
    </div>
    <div class="setblock">
      <h3>Sponsors</h3><div class="sub">Add, remove or reorder the logos at the bottom of every page.</div>
-     <div id="spon-manage">${(S.sponsors||[]).map((s,i)=>`<div class="spon-row2"><img src="${s.img}" alt="${escH(s.n)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sponsor-name',style:'font-size:14px',textContent:this.alt}))"><div class="info"><b>${escH(s.n)}</b><span>${escH(s.url||'no link')}</span></div><button class="btn gray sm" onclick="moveSponsor(${i},-1)">↑</button><button class="btn gray sm" onclick="moveSponsor(${i},1)">↓</button><button class="btn line sm" onclick="removeSponsor(${i})">Remove</button></div>`).join('')}</div>
-     <div class="miniform"><input id="sp_n" placeholder="Sponsor name"><input id="sp_url" placeholder="https:// (optional)"><button class="btn green sm" onclick="addSponsor()">Add</button></div>
+     <div id="spon-manage">${(S.sponsors||[]).map((s,i)=>`<div class="spon-row2">${s.img?`<img src="${s.img}" alt="${escH(s.n)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sponsor-name',style:'font-size:13px;color:var(--muted)',textContent:'No logo yet'}))">`:`<span class="sponsor-name" style="font-size:13px;color:var(--muted)">No logo yet</span>`}<div class="info"><b>${escH(s.n)}</b><span>${escH(s.url||'no website link')}</span></div><label class="btn line sm" style="cursor:pointer;margin:0">${s.img?'Replace':'Upload'} logo<input type="file" accept="image/*" hidden onchange="uploadSponsorLogo(${i},this)"></label><button class="btn gray sm" onclick="moveSponsor(${i},-1)">↑</button><button class="btn gray sm" onclick="moveSponsor(${i},1)">↓</button><button class="btn line sm" onclick="removeSponsor(${i})">Remove</button></div>`).join('')}</div>
+     <p class="hint" style="text-align:left;margin:6px 0 0">Upload any image, any size. It is automatically resized and centred so every logo sits the same height and looks tidy.</p>
+     <div class="miniform"><input id="sp_n" placeholder="Sponsor name"><input id="sp_url" placeholder="Their website link (optional)"><button class="btn green sm" onclick="addSponsor()">Add</button></div>
    </div>`;
 }
 function saveBrand(){const c=S.content;c.siteTitle=document.getElementById('c_title').value||c.siteTitle;c.logo=document.getElementById('c_logo').value||'🎾';c.brandOlive=document.getElementById('c_olive').value;c.brandGreen=document.getElementById('c_green').value;save();applyContent();logAudit('Updated branding');toast('Brand applied across the site')}
@@ -1943,10 +1953,41 @@ function saveHero(){S.content.heroTitle=document.getElementById('c_hero').value;
 function saveRules(){S.content.rules=document.getElementById('c_rules').value;save();logAudit('Edited rules text');toast('Rules saved')}
 function moveSponsor(i,d){const a=S.sponsors,j=i+d;if(j<0||j>=a.length)return;const tmp=a[i];a[i]=a[j];a[j]=tmp;save();renderContent();renderSponsors();logAudit('Reordered sponsors')}
 function removeSponsor(i){const s=S.sponsors[i];S.sponsors.splice(i,1);save();renderContent();renderSponsors();logAudit('Removed sponsor — '+(s&&s.n));toast('Sponsor removed')}
-function addSponsor(){const n=(document.getElementById('sp_n').value||'').trim();const url=(document.getElementById('sp_url').value||'').trim();if(!n){toast('Enter a sponsor name');return}S.sponsors.push({n,url,img:'assets/sponsors/none.png'});save();renderContent();renderSponsors();logAudit('Added sponsor — '+n);toast('Sponsor added · upload a logo any time')}
+function addSponsor(){const n=(document.getElementById('sp_n').value||'').trim();const url=(document.getElementById('sp_url').value||'').trim();if(!n){toast('Enter a sponsor name');return}S.sponsors.push({n,url,img:''});save();renderContent();renderSponsors();logAudit('Added sponsor — '+n);toast('Sponsor added · now tap Upload logo')}
+/* shrink any uploaded image to fit nicely, keep transparency, keep storage small */
+function fitLogo(file,cb){
+  if(!file)return;
+  const isSvg=/svg/i.test(file.type)||/\.svg$/i.test(file.name||'');
+  const rd=new FileReader();
+  rd.onload=function(){
+    const src=rd.result;
+    if(isSvg){cb(src);return} // SVG already scales perfectly
+    const img=new Image();
+    img.onload=function(){
+      const maxW=440,maxH=180;
+      const scale=Math.min(1,maxW/img.width,maxH/img.height); // only ever shrink
+      const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      let out;try{out=cv.toDataURL('image/png')}catch(e){out=src}
+      cb(out);
+    };
+    img.onerror=function(){cb(src)};
+    img.src=src;
+  };
+  rd.readAsDataURL(file);
+}
+function uploadSponsorLogo(i,input){const f=input.files&&input.files[0];if(!f||!S.sponsors[i])return;fitLogo(f,function(url){S.sponsors[i].img=url;save();renderContent();renderSponsors();logAudit('Uploaded logo — '+S.sponsors[i].n);toast('Logo added for <b>'+escH(S.sponsors[i].n)+'</b> · resized to fit')});input.value=''}
+function uploadBrandLogo(input){const f=input.files&&input.files[0];if(!f)return;fitLogo(f,function(url){S.content.logoImg=url;save();applyContent();renderContent();logAudit('Uploaded site logo');toast('Logo uploaded · resized to fit the site')});input.value=''}
+function clearBrandLogo(){S.content.logoImg='';save();applyContent();renderContent();toast('Logo image removed · back to the emoji')}
 function applyContent(){
   const c=S.content;if(!c)return;
-  document.querySelectorAll('.brand').forEach(b=>{b.innerHTML=`<div class="logo">${escH(c.logo||'🎾')}</div> ${escH(c.siteTitle||'Tennis Online Tour')}`});
+  document.querySelectorAll('.brand').forEach(b=>{
+    const logo=c.logoImg
+      ?`<img class="logo" src="${c.logoImg}" alt="logo" style="background:none;object-fit:contain;width:auto;height:34px;max-width:150px;border-radius:6px">`
+      :`<div class="logo">${escH(c.logo||'🎾')}</div>`;
+    b.innerHTML=`${logo} ${escH(c.siteTitle||'Tennis Online Tour')}`;
+  });
   if(c.brandOlive)document.documentElement.style.setProperty('--olive',c.brandOlive);
   if(c.brandGreen)document.documentElement.style.setProperty('--green',c.brandGreen);
   const h1=document.querySelector('.hero h1');if(h1&&c.heroTitle)h1.textContent=c.heroTitle;
@@ -1965,7 +2006,7 @@ function renderReports(){
   const lmax=Math.max.apply(null,Object.values(lvlCounts));
   const months={Mar:540,Apr:690,May:810,Jun:375};const mmax=Math.max.apply(null,Object.values(months));
   el.innerHTML=`
-   <div class="org-help">📊 The season at a glance, no spreadsheet pivots. (The demo uses sample numbers; live, these come from your real data.)</div>
+   <div class="org-help">📊 <b>What this menu is:</b> your season in numbers. <b>How to use it:</b> just read the charts, or tap an Export button to download a list for your records. <b>Why it helps:</b> you see entries, money and no-show rates at a glance instead of building a spreadsheet. (The demo shows sample numbers; the live site uses your real data.)</div>
    <div class="tiles">
      <div class="tile"><div class="tn">268</div><div class="tl">Active players</div><div class="td">+18 this month</div></div>
      <div class="tile"><div class="tn">€2,415</div><div class="tl">Revenue (season)</div></div>
@@ -2003,7 +2044,7 @@ function exportReport(kind){
 function renderSafety(){
   const el=document.getElementById('op-safety');if(!el)return;
   el.innerHTML=`
-   <div class="org-help">🛟 Your safety net. Back up everything in one click, restore it if anything goes wrong, see every change that was made, and decide who else can help.</div>
+   <div class="org-help">🛟 <b>What this menu is:</b> your safety net. <b>How to use it:</b> tap Download full backup now and then, add a helper by email if someone assists you, and scroll the log to see what changed. <b>Why it helps:</b> if anything ever goes wrong you restore everything in one click, and you always know who did what.</div>
    <div class="setblock">
      <h3>Backup &amp; restore</h3><div class="sub">Download one file with all your players, tournaments, results and settings. Restore it any time.</div>
      <div class="prompt-acts"><button class="btn green sm" onclick="backupAll()">Download full backup</button><label class="btn line sm" style="cursor:pointer;margin:0">Restore from file<input type="file" accept=".json,application/json" hidden onchange="restoreAll(this)"></label></div>
@@ -2030,7 +2071,7 @@ function renderEmbed(){
   const base='https://tour.tennisonlinetour.com';
   const snip=t=>`<iframe src="${base}/embed/${t}" width="100%" height="600" frameborder="0"></iframe>`;
   el.innerHTML=`
-   <div class="org-help">🔗 Keep your Squarespace site and show live tour data inside it. Copy a snippet and paste it into a Squarespace "Code" block; it updates itself.</div>
+   <div class="org-help">🔗 <b>What this menu is:</b> the way to show your tour on your existing Squarespace site. <b>How to use it:</b> tap Copy code next to the table you want, then paste it into a Squarespace "Code" block. <b>Why it helps:</b> your rankings and results appear on your own website and keep themselves up to date, so you never copy them across by hand.</div>
    ${[['Rankings','rankings'],['Latest results','results'],['Open tournaments','tournaments'],['Activity leaderboard','activity']].map(pair=>`<div class="setblock"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">${pair[0]}</h3><button class="btn line sm" onclick="copyEmbed('${pair[1]}')">Copy code</button></div><div class="embed-box" id="emb-${pair[1]}">${escH(snip(pair[1]))}</div></div>`).join('')}
    <div class="setblock"><h3>Calendar &amp; downloads</h3><div class="sub">Put tournament dates and match deadlines in any calendar app, or download your data.</div>
      <div class="prompt-acts"><button class="btn line sm" onclick="toast('Calendar link copied · add it to Google or Apple Calendar')">Copy calendar link</button><button class="btn line sm" onclick="exportReport('results')">Results CSV</button><button class="btn line sm" onclick="exportMembers()">Members CSV</button></div>
