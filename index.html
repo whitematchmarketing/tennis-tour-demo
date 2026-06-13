@@ -397,6 +397,14 @@
   <section class="wrap">
     <div class="shead"><h2>Organiser tools</h2><p>Create tournaments, approve entries and see results as they come in. Works like a simple dashboard, no spreadsheets and no code.</p></div>
     <div class="admin-banner">🔒 <div><b>Admin only.</b> This menu is visible to the organiser, not to players. It is shown here in the demo so you can see how you would run the tour. Players only see Home, Tournaments, Rankings, Activity and My Tour.</div></div>
+
+    <div class="org-subnav" id="org-subnav"></div>
+
+    <!-- TODAY / command centre -->
+    <div class="org-panel show" id="op-today"></div>
+
+    <!-- RUN THE TOUR (core operations) -->
+    <div class="org-panel" id="op-run">
     <div class="adm-grid">
       <div style="display:flex;flex-direction:column;gap:16px">
       <div class="card pad">
@@ -478,6 +486,17 @@
       <div id="adm-members"></div>
       <p class="hint" style="text-align:left;margin-top:10px">GDPR: as organiser you are the data controller. Import only details people agreed to share. <b>Remove</b> honours a deletion request; <b>Export CSV</b> honours a data request.</p>
     </div>
+    </div><!-- /op-run -->
+
+    <div class="org-panel" id="op-pay"></div>
+    <div class="org-panel" id="op-disc"></div>
+    <div class="org-panel" id="op-rank"></div>
+    <div class="org-panel" id="op-msg"></div>
+    <div class="org-panel" id="op-loy"></div>
+    <div class="org-panel" id="op-content"></div>
+    <div class="org-panel" id="op-reports"></div>
+    <div class="org-panel" id="op-safety"></div>
+    <div class="org-panel" id="op-embed"></div>
   </section>
 </div>
 
@@ -622,6 +641,91 @@
 .fillhint{font-size:11.5px;color:var(--muted);margin:1px 0 2px}
 .fillhint.ready{color:var(--green);font-weight:600}
 #adm-manage{max-height:300px;overflow:auto}
+
+/* ===================== ORGANISER CONSOLE ===================== */
+.org-subnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.org-tab{border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;font-size:12.5px;color:var(--muted);padding:8px 13px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.12s}
+.org-tab:hover{border-color:#cdbfa6;color:var(--ink)}
+.org-tab.active{background:var(--olive);color:#fff;border-color:var(--olive)}
+.org-tab .cnt{background:#f0523d;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 6px;min-width:17px;text-align:center}
+.org-tab.active .cnt{background:rgba(255,255,255,.25)}
+.org-panel{display:none}
+.org-panel.show{display:block;animation:fade .2s ease}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow)}
+.tile .tn{font-family:Roboto;font-weight:800;font-size:24px;color:var(--ink)}
+.tile .tl{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+.tile .td{font-size:12px;color:var(--green);font-weight:600;margin-top:4px}
+.tile.warn{border-color:#ecdcae;background:#fdf8ec}.tile.warn .tn{color:#b8631b}
+.tile.bad{border-color:#f3cfcf;background:#fdf3f3}.tile.bad .tn{color:#c0392b}
+@media(max-width:760px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.attn-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.attn-row:last-child{border-bottom:0}
+.attn-row:hover{background:#f7f3ea}
+.attn-ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:18px;flex:none;background:#f1ead9}
+.attn-row .info{flex:1;min-width:0}.attn-row .info b{font-size:14px}.attn-row .info span{display:block;font-size:12.5px;color:var(--muted)}
+.attn-n{font-family:Roboto;font-weight:800;font-size:18px;color:var(--olive)}
+.attn-go{font-size:18px;color:var(--muted)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{border:1px solid var(--line);background:#fff;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ledger{width:100%;border-collapse:collapse;font-size:13.5px}
+.ledger th{font-size:10.5px}
+.ledger td{padding:11px 12px}
+.st-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.st-paid{background:#eafaf0;color:#1a9c5b}.st-unpaid{background:#fff4e6;color:#b8631b}
+.st-refunded{background:#eef3ef;color:var(--muted)}.st-waived{background:#eef4fb;color:#3c6f9c}
+.st-voucher{background:#f6efdc;color:#9a7b1e}.st-active{background:#fdeaea;color:#c0392b}
+.st-expired{background:#eef3ef;color:var(--muted)}.st-banned{background:#fdeaea;color:#c0392b}
+.setblock{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.setblock h3{font-size:15px;margin-bottom:3px}
+.setblock .sub{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.toggle-row:last-child{border-bottom:0}
+.toggle-row .tinfo b{font-size:13.5px}.toggle-row .tinfo span{display:block;font-size:12px;color:var(--muted)}
+.sw{position:relative;width:42px;height:24px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw .sl{position:absolute;inset:0;background:#d8cdb8;border-radius:999px;transition:.18s;cursor:pointer}
+.sw .sl:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s}
+.sw input:checked+.sl{background:var(--green)}
+.sw input:checked+.sl:before{transform:translateX(18px)}
+.ptstable{display:grid;grid-template-columns:1.3fr repeat(4,1fr);gap:8px;align-items:center;font-size:13px}
+.ptstable .ph{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700}
+.ptstable input{width:100%;font:inherit;font-size:13px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:#fdfbf7;text-align:center}
+.txed{width:100%;font:inherit;font-size:13.5px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fdfbf7;resize:vertical;line-height:1.5}
+.txed:focus,.ptstable input:focus{outline:0;border-color:var(--green);background:#fff}
+.prompt-card{display:flex;gap:13px;align-items:flex-start;background:#f3f7f1;border:1px solid #d7e6d4;border-radius:13px;padding:14px 16px;margin-bottom:11px}
+.prompt-card.rel{background:#fdf4ec;border-color:#ecd9c2}
+.prompt-card .pic{font-size:22px;flex:none}
+.prompt-card .pbody{flex:1}.prompt-card .pbody b{font-size:14px}.prompt-card .pbody p{font-size:12.5px;color:var(--muted);margin-top:2px}
+.prompt-acts{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.embed-box{background:#1d211a;color:#cfe0d2;border-radius:11px;padding:13px 14px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.5;overflow:auto;white-space:pre-wrap;word-break:break-all;margin:8px 0}
+.bargrp{margin-bottom:16px}
+.barrow{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+.barrow .blbl{width:120px;flex:none;color:var(--muted)}
+.bartrack{flex:1;height:18px;background:#efe7d8;border-radius:999px;overflow:hidden}
+.barfill{height:100%;background:linear-gradient(90deg,var(--green),var(--olive));border-radius:999px}
+.barrow .bval{width:56px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.aud-row{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.aud-row:last-child{border-bottom:0}
+.aud-row .at{color:var(--muted);font-size:11.5px;white-space:nowrap;width:96px;flex:none}
+.compose-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.compose-grid,.ptstable{grid-template-columns:1fr}.ptstable .ph{display:none}}
+.spon-row2{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.spon-row2:last-child{border-bottom:0}
+.spon-row2 img{height:34px;max-width:110px;object-fit:contain}
+.spon-row2 .info{flex:1;min-width:0}.spon-row2 .info b{font-size:13.5px}.spon-row2 .info span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.miniform{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px}
+.miniform input,.miniform select{font:inherit;font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;width:100%}
+.miniform input:focus{outline:0;border-color:var(--green)}
+@media(max-width:560px){.miniform{grid-template-columns:1fr 1fr}.miniform button{grid-column:1/-1}}
+.swatch{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);padding:0;cursor:pointer}
+.role-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
+.role-row:last-child{border-bottom:0}
+.role-row .info{flex:1}.role-row .info b{font-size:13.5px}.role-row .info span{font-size:12px;color:var(--muted)}
+.role-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#eef4ea;color:var(--green)}
+.org-help{font-size:12.5px;color:var(--muted);background:#f4efe6;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:16px;line-height:1.5}
+.org-help b{color:var(--olive)}
 </style>
 
 <script>
@@ -743,10 +847,30 @@ function seedMembers(){
 }
 
 /* ============ persistent state ============ */
-const KEY="tot_demo_v5";
+const KEY="tot_demo_v6";
 let S=load();
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY))||fresh();if(!s.members)s.members=seedMembers();return s}catch(e){return fresh()}}
-function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0,members:seedMembers()}}
+function load(){
+  let s;try{s=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){return fresh()}
+  // backfill any slice a returning demo session is missing
+  if(!s.members)s.members=seedMembers();
+  if(!s.payments)s.payments=seedPayments();
+  if(!s.strikes)s.strikes=seedStrikes();
+  if(!s.vouchers)s.vouchers=seedVouchers();
+  if(!s.audit)s.audit=seedAudit();
+  if(!s.roles)s.roles=seedRoles();
+  if(!s.sentLog)s.sentLog=[];
+  if(!s.notif)s.notif=freshNotif();
+  if(!s.content)s.content=freshContent();
+  if(!s.ptsTable)s.ptsTable=freshPtsTable();
+  if(!s.sponsors)s.sponsors=SPONSORS.map(x=>({...x}));
+  if(!s.badges)s.badges=BADGES.map(x=>({...x}));
+  if(s.announce===undefined)s.announce='';
+  if(!s.lastPublished)s.lastPublished='Wed 11 Jun';
+  return s;
+}
+function fresh(){return{profile:null,entries:[],matches:[],created:[],entryStatus:{},drawn:{},tEdits:{},requireApproval:true,regApproved:false,adjust:0,pts:0,w:0,l:0,act:0,played:0,
+  members:seedMembers(),payments:seedPayments(),strikes:seedStrikes(),vouchers:seedVouchers(),audit:seedAudit(),roles:seedRoles(),sentLog:[],
+  notif:freshNotif(),content:freshContent(),ptsTable:freshPtsTable(),sponsors:SPONSORS.map(x=>({...x})),badges:BADGES.map(x=>({...x})),announce:'',lastPublished:'Wed 11 Jun'}}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function resetDemo(){localStorage.removeItem(KEY);S=fresh();renderAll();go('home');toast('Demo reset')}
 
@@ -950,7 +1074,7 @@ function renderRanks(){
 function myBadges(){const b=[];if(S.played>=1)b.push('🎾');if(S.played>=3)b.push('👍');if(S.played>=5)b.push('👌');if(S.w>=3)b.push('🔥');return b.join(' ')||'—'}
 function renderLeaderboard(){
   const leg=document.getElementById('badge-legend');
-  if(leg)leg.innerHTML=BADGES.map(bd=>`<div class="badge-card"><span class="badge-e">${bd.e}</span><div class="badge-i"><b>${bd.n}</b><span>${bd.req}</span></div><span class="badge-p">+${bd.p}</span></div>`).join('')
+  if(leg)leg.innerHTML=(S.badges||BADGES).map(bd=>`<div class="badge-card"><span class="badge-e">${bd.e}</span><div class="badge-i"><b>${bd.n}</b><span>${bd.req}</span></div>${bd.p!=null?`<span class="badge-p">+${bd.p}</span>`:''}</div>`).join('')
     +`<div class="badge-card badge-soon"><span class="badge-e">✨</span><div class="badge-i"><b>More coming soon</b><span>New badges are on the way</span></div></div>`;
   const arr=SAMPLE_ACTIVITY.map(p=>({...p}));
   if(S.profile&&S.played>0)arr.push({n:S.profile.first+' '+S.profile.last,f:FLAG[S.profile.country],m:S.played,b:myBadges(),a:S.act,me:true});
@@ -1444,11 +1568,480 @@ function openPrivacy(){
 function sponsorFallback(img){const s=document.createElement('span');s.className='sponsor-name';s.textContent=img.getAttribute('data-name')||'';img.replaceWith(s);}
 function renderSponsors(){
   const el=document.getElementById('sponsor-row');
-  if(el)el.innerHTML=SPONSORS.map(s=>`<img class="sponsor-logo" src="${s.img}" alt="${escH(s.n)}" title="${escH(s.n)}" data-name="${escH(s.n)}" loading="lazy" onerror="sponsorFallback(this)" />`).join('');
+  if(el)el.innerHTML=(S.sponsors||SPONSORS).map(s=>`<img class="sponsor-logo" src="${s.img}" alt="${escH(s.n)}" title="${escH(s.n)}" data-name="${escH(s.n)}" loading="lazy" onerror="sponsorFallback(this)" />`).join('');
 }
 function remind(name){toast(`Reminder sent to <b>${escH(name)}</b> &middot; deadline is coming up`)}
 
-function renderAll(){renderReg();renderT();renderRtabs();renderRanks();renderResults();renderLeaderboard();renderDash();renderAdmin();renderSponsors()}
+/* ===================== ORGANISER CONSOLE (no-code) ===================== */
+/* ---- seed data (hoisted; called by load()/fresh()) ---- */
+function seedPayments(){return[
+  {player:"Marco Borg",f:"🇲🇹",t:"Challengers 200",amount:15,method:"Revolut",status:"unpaid",date:"",note:""},
+  {player:"Lena Fischer",f:"🇩🇪",t:"Juniors 75",amount:15,method:"BOV",status:"unpaid",date:"",note:""},
+  {player:"Sofia Ricci",f:"🇮🇹",t:"ATP/WTA 500",amount:15,method:"Revolut",status:"paid",date:"05 Jun",note:""},
+  {player:"Pierre Dubois",f:"🇫🇷",t:"Challengers 175",amount:15,method:"Revolut",status:"paid",date:"04 Jun",note:""},
+  {player:"Hannah Vella",f:"🇲🇹",t:"Futures 150",amount:15,method:"BOV",status:"paid",date:"03 Jun",note:""},
+  {player:"Diego Santos",f:"🇪🇸",t:"Futures 125",amount:0,method:"Voucher",status:"voucher",date:"02 Jun",note:"100 activity pts"},
+  {player:"Omar Haddad",f:"🇲🇹",t:"Challengers 175",amount:15,method:"Revolut",status:"refunded",date:"01 Jun",note:"withdrew before draw"},
+  {player:"Yuki Tanaka",f:"🇯🇵",t:"Juniors 100",amount:0,method:"Comp",status:"waived",date:"31 May",note:"sponsor guest"},
+]}
+function seedStrikes(){return[
+  {player:"Tom Becker",f:"🇩🇪",reason:"No-show, Round 2",date:"28 May",status:"active"},
+  {player:"Tom Becker",f:"🇩🇪",reason:"Did not arrange match",date:"14 May",status:"active"},
+  {player:"Diego Santos",f:"🇪🇸",reason:"Late cancellation",date:"20 May",status:"expired"},
+]}
+function seedVouchers(){return[
+  {player:"Diego Santos",f:"🇪🇸",reason:"Reached 100 activity points",status:"redeemed",date:"02 Jun"},
+  {player:"Hannah Vella",f:"🇲🇹",reason:"Reached 100 activity points",status:"issued",date:"06 Jun"},
+  {player:"Marco Borg",f:"🇲🇹",reason:"Reached 100 activity points",status:"earned",date:""},
+]}
+function seedAudit(){return[
+  {at:"Today 09:14",who:"You",what:"Approved payment — Sofia Ricci, ATP/WTA 500"},
+  {at:"Today 09:02",who:"You",what:"Published Wednesday rankings"},
+  {at:"Yesterday",who:"You",what:"Resolved dispute — Hannah Vella vs Omar Haddad"},
+  {at:"Yesterday",who:"Co-organiser",what:"Created tournament — Challengers 200"},
+]}
+function seedRoles(){return[
+  {name:"You (owner)",email:"delicatatennis@gmail.com",role:"Owner"},
+  {name:"Assistant",email:"helper@tennisonlinetour.com",role:"Results helper"},
+]}
+function freshNotif(){return{senderName:"Tennis Online Tour",replyTo:"delicatatennis@gmail.com",leadDays:2,
+  events:{regApproved:true,entryPending:true,paymentApproved:true,groupDrawn:true,matchReminder:true,overdue:true,resultReported:true,dispute:true,ranking:true,promo:true}}}
+function freshContent(){return{siteTitle:"Tennis Online Tour",logo:"🎾",heroTitle:"",heroSub:"",rules:"",
+  brandOlive:"#1f4d37",brandGreen:"#2f6b4a",
+  payInstructions:"Pay €15 by Revolut or BOV Mobile to +356 79335554. Use your full name as the payment reference.",fee:15}}
+function freshPtsTable(){return[
+  {tier:"Juniors",pts:[75,40,20,10]},
+  {tier:"Futures",pts:[150,80,40,20]},
+  {tier:"Challengers",pts:[200,110,55,25]},
+  {tier:"ATP/WTA",pts:[250,135,70,30]},
+  {tier:"Masters",pts:[1000,600,300,120]},
+]}
+/* level-change prompts the tour surfaces for the organiser (sample) */
+let PROMO_PROMPTS=[
+  {kind:"promo",player:"Hannah Vella",f:"🇲🇹",from:"Futures",to:"Challengers",reason:"Won 1st place in 5 Futures events"},
+  {kind:"rel",player:"Omar Haddad",f:"🇲🇹",from:"Challengers",to:"Futures",reason:"Finished 4th in 4 Challengers events"},
+];
+
+/* ---- sub-tab navigation ---- */
+const ORG_TABS=[
+  {id:'today',label:'Today',icon:'📋'},
+  {id:'run',label:'Run the tour',icon:'🎾'},
+  {id:'pay',label:'Payments',icon:'💶'},
+  {id:'disc',label:'Discipline',icon:'⚠️'},
+  {id:'rank',label:'Levels & points',icon:'📈'},
+  {id:'msg',label:'Messaging',icon:'✉️'},
+  {id:'loy',label:'Loyalty',icon:'🎁'},
+  {id:'content',label:'Content & brand',icon:'🎨'},
+  {id:'reports',label:'Reports',icon:'📊'},
+  {id:'safety',label:'Safety',icon:'🛟'},
+  {id:'embed',label:'Publish',icon:'🔗'},
+];
+let curOrg='today';
+function orgTab(id){
+  curOrg=id;
+  document.querySelectorAll('.org-panel').forEach(p=>p.classList.remove('show'));
+  const panel=document.getElementById('op-'+id);if(panel)panel.classList.add('show');
+  document.querySelectorAll('.org-tab').forEach(t=>t.classList.toggle('active',t.dataset.o===id));
+  renderOrgPanel(id);
+  window.scrollTo({top:document.getElementById('view-admin').offsetTop-10,behavior:'smooth'});
+}
+function renderOrgPanel(id){({today:renderToday,run:function(){},pay:renderPay,disc:renderDisc,rank:renderRankTools,msg:renderMsg,loy:renderLoy,content:renderContent,reports:renderReports,safety:renderSafety,embed:renderEmbed}[id]||function(){})()}
+function renderOrgNav(){
+  const nav=document.getElementById('org-subnav');if(!nav)return;
+  const a=attn();
+  const counts={today:a.total,pay:a.unpaid,disc:a.bans,rank:PROMO_PROMPTS.length};
+  nav.innerHTML=ORG_TABS.map(t=>{const c=counts[t.id]||0;
+    return `<button class="org-tab ${t.id===curOrg?'active':''}" data-o="${t.id}" onclick="orgTab('${t.id}')">${t.icon} ${t.label}${c?` <span class="cnt">${c}</span>`:''}</button>`;}).join('');
+}
+function logAudit(what){S.audit=S.audit||[];S.audit.unshift({at:'Just now',who:'You',what});if(S.audit.length>40)S.audit.length=40;save()}
+
+/* ---- shared metrics ---- */
+function payNum(s){return (S.payments||[]).filter(p=>p.status===s)}
+function outstanding(){return payNum('unpaid').reduce((a,p)=>a+(p.amount||15),0)}
+function paidThisMonth(){return payNum('paid').reduce((a,p)=>a+(p.amount||0),0)}
+function bannedPlayers(){
+  const cnt={};
+  (S.strikes||[]).filter(s=>s.status==='active').forEach(s=>{cnt[s.player]=(cnt[s.player]||0)+1});
+  return Object.keys(cnt).filter(p=>cnt[p]>=3).map(p=>({player:p,strikes:cnt[p],f:((S.strikes.find(s=>s.player===p)||{}).f)||'🎾'}));
+}
+function attn(){
+  const unpaid=payNum('unpaid').length;
+  const regs=pendingRegs.length+((S.profile&&!S.regApproved)?1:0);
+  const entries=pendingEntries.length+((S.entries||[]).filter(id=>(S.entryStatus||{})[id]==='pending').length);
+  let disputes=sampleResults.filter(r=>r.st==='disputed').length;
+  S.matches.forEach(m=>{if(m.st==='disputed')disputes++});
+  const overdue=S.matches.filter(m=>m.st==='arrange'&&(S.entryStatus||{})[m.tid]==='approved'&&(S.drawn||{})[m.tid]).length;
+  const bans=bannedPlayers().length, promos=PROMO_PROMPTS.length;
+  return {unpaid,regs,entries,disputes,overdue,bans,promos,total:unpaid+regs+entries+disputes+overdue+bans+promos};
+}
+
+/* ---- TODAY / command centre ---- */
+function renderToday(){
+  const el=document.getElementById('op-today');if(!el)return;
+  const a=attn();
+  const rows=[
+    {n:a.unpaid,ic:'💶',b:'Unpaid entries',s:'Confirm €15 payments to release groups',go:'pay',cls:a.unpaid?'bad':''},
+    {n:a.entries,ic:'📝',b:'Entries to approve',s:'Players waiting to join a tournament',go:'run',cls:''},
+    {n:a.regs,ic:'🙋',b:'New registrations',s:'New players awaiting approval',go:'run',cls:''},
+    {n:a.disputes,ic:'⚖️',b:'Disputed results',s:'Two players disagree on a score',go:'run',cls:a.disputes?'bad':''},
+    {n:a.overdue,ic:'⏰',b:'Overdue matches',s:'Not played yet — remind or log it',go:'run',cls:''},
+    {n:a.promos,ic:'📈',b:'Level decisions',s:'Promotions and relegations to review',go:'rank',cls:''},
+    {n:a.bans,ic:'🚫',b:'Active bans',s:'Players currently blocked from entering',go:'disc',cls:a.bans?'bad':''},
+  ];
+  el.innerHTML=`
+   <div class="org-help">👋 <b>This is your home base.</b> Everything that needs a decision today is below. Tap any line to jump straight to it. Nothing here needs code, a developer or a spreadsheet.</div>
+   <div class="tiles">
+     <div class="tile ${a.total?'warn':''}"><div class="tn">${a.total}</div><div class="tl">Need attention</div></div>
+     <div class="tile"><div class="tn">€${paidThisMonth()}</div><div class="tl">Paid this month</div></div>
+     <div class="tile ${outstanding()?'warn':''}"><div class="tn">€${outstanding()}</div><div class="tl">Outstanding</div></div>
+     <div class="tile"><div class="tn">${(S.members||[]).length}</div><div class="tl">Players</div></div>
+   </div>
+   <div class="setblock">
+     <h3>Needs your attention</h3>
+     <div class="sub">Last rankings published ${escH(S.lastPublished)}. New tournaments go out every Saturday.</div>
+     ${rows.map(r=>`<div class="attn-row" onclick="orgTab('${r.go}')"><div class="attn-ic">${r.ic}</div><div class="info"><b>${r.b}</b><span>${r.s}</span></div><div class="attn-n ${r.cls}">${r.n}</div><div class="attn-go">›</div></div>`).join('')}
+   </div>
+   <div class="setblock">
+     <h3>Your week, handled for you</h3>
+     <div class="sub">The tour keeps its own rhythm so you do not have to chase it.</div>
+     <div class="attn-row" style="cursor:default"><div class="attn-ic">📅</div><div class="info"><b>Saturday</b><span>New tournaments published, last week's registration closes</span></div></div>
+     <div class="attn-row" style="cursor:default"><div class="attn-ic">🎾</div><div class="info"><b>Monday to Sunday</b><span>Players arrange and report matches, reminders sent automatically</span></div></div>
+     <div class="attn-row" style="cursor:default"><div class="attn-ic">📈</div><div class="info"><b>Wednesday</b><span>Rankings recalculated, preview and publish in one tap</span></div></div>
+   </div>`;
+}
+
+/* ---- PAYMENTS ---- */
+let payFilter='all';
+function renderPay(){
+  const el=document.getElementById('op-pay');if(!el)return;
+  const f=payFilter;
+  const list=(S.payments||[]).map((p,i)=>({p,i})).filter(x=>f==='all'||x.p.status===f);
+  const sum=s=>payNum(s).reduce((a,p)=>a+(p.amount||0),0);
+  el.innerHTML=`
+   <div class="org-help">💶 Every €15 entry in one place. Mark who has paid by Revolut or BOV, refund a withdrawal, or comp a guest. No more cross-checking a bank app against a spreadsheet.</div>
+   <div class="tiles">
+     <div class="tile"><div class="tn">€${sum('paid')}</div><div class="tl">Collected</div></div>
+     <div class="tile ${outstanding()?'warn':''}"><div class="tn">€${outstanding()}</div><div class="tl">Outstanding</div></div>
+     <div class="tile"><div class="tn">€${sum('refunded')}</div><div class="tl">Refunded</div></div>
+     <div class="tile"><div class="tn">${payNum('voucher').length+payNum('waived').length}</div><div class="tl">Vouchers / comps</div></div>
+   </div>
+   <div class="setblock">
+     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px"><h3 style="margin:0">Entry payments</h3><button class="btn line sm" onclick="remindAllUnpaid()">Remind all unpaid</button></div>
+     <div class="chips">${['all','unpaid','paid','refunded','waived','voucher'].map(s=>`<button class="chip ${s===f?'active':''}" onclick="payFilter='${s}';renderPay()">${s[0].toUpperCase()+s.slice(1)}${s!=='all'?' ('+payNum(s).length+')':''}</button>`).join('')}</div>
+     <div style="overflow:auto"><table class="ledger">
+       <thead><tr><th>Player</th><th>Tournament</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th><th></th></tr></thead>
+       <tbody>${list.map(x=>payRow(x.p,x.i)).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:18px">Nothing here</td></tr>'}</tbody>
+     </table></div>
+   </div>
+   <div class="setblock">
+     <h3>Payment instructions</h3><div class="sub">Shown to players when they enter. Edit your details and fee once, used everywhere.</div>
+     <div class="field"><label>Entry fee (€)</label><input id="set_fee" type="number" value="${S.content.fee}" style="max-width:120px"></div>
+     <textarea id="set_payinfo" class="txed" rows="3">${escH(S.content.payInstructions)}</textarea>
+     <button class="btn green sm" style="margin-top:10px" onclick="savePayInfo()">Save instructions</button>
+   </div>`;
+}
+function payRow(p,i){
+  const acts=[];
+  if(p.status!=='paid'&&p.status!=='refunded')acts.push(`<button class="btn green sm" onclick="setPay(${i},'paid')">Mark paid</button>`);
+  if(p.status==='paid')acts.push(`<button class="btn line sm" onclick="setPay(${i},'refunded')">Refund</button>`);
+  if(p.status==='unpaid'){acts.push(`<button class="btn line sm" onclick="setPay(${i},'waived')">Comp</button>`);acts.push(`<button class="btn gray sm" onclick="remindPay(${i})">Remind</button>`);}
+  return `<tr><td><b>${p.f||'🎾'} ${escH(p.player)}</b></td><td>${escH(p.t)}</td><td>${p.amount?'€'+p.amount:'—'}</td><td>${escH(p.method||'')}</td><td><span class="st-pill st-${p.status}">${p.status}</span></td><td style="color:var(--muted)">${p.date||'—'}</td><td><div class="rowacts">${acts.join('')}</div></td></tr>`;
+}
+function setPay(i,st){const p=S.payments[i];if(!p)return;p.status=st;
+  if(st==='paid'){p.date='Today';logAudit('Marked paid — '+p.player+', '+p.t)}
+  else if(st==='refunded'){logAudit('Refunded — '+p.player+', '+p.t)}
+  else if(st==='waived'){p.amount=0;p.method='Comp';logAudit('Comped entry — '+p.player)}
+  save();renderOrgNav();renderPay();renderToday();
+  toast(st==='paid'?'Payment confirmed · group released':st==='refunded'?'Marked refunded':'Entry comped')}
+function remindPay(i){const p=S.payments[i];toast('Reminder sent to <b>'+escH(p.player)+'</b> · €'+(p.amount||15)+' for '+escH(p.t))}
+function remindAllUnpaid(){const n=payNum('unpaid').length;toast(n?('Reminder sent to <b>'+n+'</b> unpaid '+(n===1?'player':'players')):'No unpaid entries right now')}
+function savePayInfo(){S.content.fee=parseInt(document.getElementById('set_fee').value,10)||15;S.content.payInstructions=document.getElementById('set_payinfo').value;save();logAudit('Edited payment instructions');toast('Payment instructions saved')}
+
+/* ---- DISCIPLINE (strikes & bans) ---- */
+function renderDisc(){
+  const el=document.getElementById('op-disc');if(!el)return;
+  const banned=bannedPlayers();
+  const active=(S.strikes||[]).filter(s=>s.status==='active').length;
+  el.innerHTML=`
+   <div class="org-help">⚠️ No-shows and no-contact are logged here. Three active strikes and the tour blocks that player from entering for three weeks, automatically. You can excuse a strike or lift a ban any time.</div>
+   <div class="tiles">
+     <div class="tile"><div class="tn">${active}</div><div class="tl">Active strikes</div></div>
+     <div class="tile ${banned.length?'bad':''}"><div class="tn">${banned.length}</div><div class="tl">Banned now</div></div>
+     <div class="tile"><div class="tn">3</div><div class="tl">Strikes = ban</div></div>
+     <div class="tile"><div class="tn">3 wks</div><div class="tl">Ban length</div></div>
+   </div>
+   ${banned.length?`<div class="setblock"><h3>Currently banned</h3><div class="sub">Blocked from entering until their ban ends.</div>${banned.map(b=>`<div class="role-row"><span class="flag" style="font-size:20px">${b.f}</span><div class="info"><b>${escH(b.player)}</b><span>${b.strikes} active strikes · ban ends in ~3 weeks</span></div><span class="st-pill st-banned">Banned</span> <button class="btn line sm" onclick="liftBan('${escH(b.player).replace(/'/g,'')}')">Lift ban</button></div>`).join('')}</div>`:''}
+   <div class="setblock">
+     <h3>Record a no-show / strike</h3><div class="sub">Add a strike when a player does not show up or does not arrange a match.</div>
+     <div class="miniform"><input id="str_name" placeholder="Player name"><input id="str_reason" placeholder="Reason (e.g. no-show Round 2)"><button class="btn green sm" onclick="addStrike()">Add strike</button></div>
+   </div>
+   <div class="setblock">
+     <h3>Strike history</h3>
+     <div style="overflow:auto"><table class="ledger"><thead><tr><th>Player</th><th>Reason</th><th>Date</th><th>Status</th><th></th></tr></thead>
+     <tbody>${(S.strikes||[]).map((s,i)=>`<tr><td><b>${s.f||'🎾'} ${escH(s.player)}</b></td><td>${escH(s.reason)}</td><td style="color:var(--muted)">${s.date||'—'}</td><td><span class="st-pill st-${s.status}">${s.status}</span></td><td><div class="rowacts">${s.status==='active'?`<button class="btn gray sm" onclick="excuseStrike(${i})">Excuse</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No strikes recorded</td></tr>'}</tbody></table></div>
+   </div>`;
+}
+function addStrike(){
+  const n=(document.getElementById('str_name').value||'').trim();
+  const r=(document.getElementById('str_reason').value||'').trim()||'No-show';
+  if(!n){toast('Enter a player name');return}
+  const m=(S.members||[]).find(x=>(x.n||'').toLowerCase()===n.toLowerCase());
+  S.strikes.unshift({player:n,f:(m&&m.f)||'🎾',reason:r,date:'Today',status:'active'});
+  const nowBanned=bannedPlayers().some(b=>b.player.toLowerCase()===n.toLowerCase());
+  logAudit('Added strike — '+n+' ('+r+')');save();renderOrgNav();renderDisc();renderToday();
+  toast(nowBanned?('<b>'+escH(n)+'</b> now banned · 3 strikes reached'):('Strike added for <b>'+escH(n)+'</b>'));
+}
+function excuseStrike(i){const s=S.strikes[i];if(!s)return;s.status='expired';logAudit('Excused strike — '+s.player);save();renderOrgNav();renderDisc();renderToday();toast('Strike excused')}
+function liftBan(name){(S.strikes||[]).forEach(s=>{if(s.player.toLowerCase()===name.toLowerCase())s.status='expired'});logAudit('Lifted ban — '+name);save();renderOrgNav();renderDisc();renderToday();toast('Ban lifted for <b>'+escH(name)+'</b>')}
+
+/* ---- LEVELS & POINTS ---- */
+function renderRankTools(){
+  const el=document.getElementById('op-rank');if(!el)return;
+  el.innerHTML=`
+   <div class="org-help">📈 Rankings calculate themselves from results. Here you handle the judgement calls: who moves up a level, what each finish is worth, when points expire, and the weekly publish.</div>
+   <div class="setblock">
+     <h3>Level decisions ${PROMO_PROMPTS.length?`<span class="badge wait">${PROMO_PROMPTS.length} to review</span>`:''}</h3>
+     <div class="sub">The tour flags players who hit the promotion or relegation rule. Approve or defer with one tap.</div>
+     ${PROMO_PROMPTS.length?PROMO_PROMPTS.map((p,i)=>`<div class="prompt-card ${p.kind==='rel'?'rel':''}"><div class="pic">${p.kind==='rel'?'🔻':'🔼'}</div><div class="pbody"><b>${p.f} ${escH(p.player)} — ${p.kind==='rel'?'relegate':'promote'} to ${escH(p.to)}?</b><p>${escH(p.reason)} (currently ${escH(p.from)}).</p><div class="prompt-acts"><button class="btn green sm" onclick="applyPromo(${i})">${p.kind==='rel'?'Relegate':'Promote'}</button><button class="btn line sm" onclick="deferPromo(${i})">Defer</button></div></div></div>`).join(''):'<p style="font-size:13px;color:var(--muted)">No level changes due right now.</p>'}
+   </div>
+   <div class="setblock">
+     <h3>Points table</h3><div class="sub">What each finishing position earns, per level. Change a number and save.</div>
+     <div class="ptstable">
+       <span class="ph">Level</span><span class="ph">1st</span><span class="ph">2nd</span><span class="ph">3rd</span><span class="ph">4th</span>
+       ${S.ptsTable.map((r,i)=>`<b style="font-size:13px">${r.tier}</b>${[0,1,2,3].map(j=>`<input type="number" value="${r.pts[j]}" onchange="editPts(${i},${j},this.value)">`).join('')}`).join('')}
+     </div>
+     <button class="btn green sm" style="margin-top:12px" onclick="savePts()">Save points table</button>
+   </div>
+   <div class="setblock">
+     <h3>Wednesday rankings</h3><div class="sub">Last published ${escH(S.lastPublished)}. Preview the new table, then publish for everyone, or roll back.</div>
+     <div class="prompt-acts">
+       <button class="btn line sm" onclick="go('rankings')">Preview rankings</button>
+       <button class="btn green sm" onclick="publishRanks()">Publish now</button>
+       <button class="btn gray sm" onclick="toast('Rolled back to '+S.lastPublished+' · players see the previous table')">Roll back</button>
+     </div>
+   </div>
+   <div class="setblock">
+     <h3>Points expiry</h3><div class="sub">Points count for one year, then drop off. The tour does this automatically; you can also run it on demand.</div>
+     <button class="btn line sm" onclick="toast('Expired points older than 12 months · rankings recalculated')">Run yearly expiry</button>
+   </div>`;
+}
+function applyPromo(i){const p=PROMO_PROMPTS[i];if(!p)return;PROMO_PROMPTS.splice(i,1);logAudit((p.kind==='rel'?'Relegated ':'Promoted ')+p.player+' to '+p.to);renderOrgNav();renderRankTools();renderToday();toast('<b>'+escH(p.player)+'</b> '+(p.kind==='rel'?'relegated to ':'promoted to ')+escH(p.to)+' · player notified')}
+function deferPromo(i){const p=PROMO_PROMPTS[i];if(!p)return;PROMO_PROMPTS.splice(i,1);renderOrgNav();renderRankTools();renderToday();toast('Deferred · we will flag '+escH(p.player)+' again next week')}
+function editPts(i,j,v){if(S.ptsTable[i])S.ptsTable[i].pts[j]=parseInt(v,10)||0}
+function savePts(){save();logAudit('Edited points table');toast('Points table saved')}
+function publishRanks(){S.lastPublished='Today';save();logAudit('Published rankings');renderRankTools();renderToday();toast('Rankings published · players notified of changes')}
+
+/* ---- MESSAGING ---- */
+function renderMsg(){
+  const el=document.getElementById('op-msg');if(!el)return;
+  const ev=S.notif.events;
+  const evLabels={regApproved:'Registration approved',entryPending:'Entry received, pay €15',paymentApproved:'Payment confirmed, group released',groupDrawn:'Group drawn, here are your opponents',matchReminder:'Match reminder before deadline',overdue:'Match overdue',resultReported:'Result reported, confirm or dispute',dispute:'A result was disputed',ranking:'Weekly rankings published',promo:'You levelled up or down'};
+  el.innerHTML=`
+   <div class="org-help">✉️ This replaces the manual emailing. Write once and send to the right group, or let the tour send the routine emails for you. (In the demo a send shows a confirmation; live, real emails go out.)</div>
+   <div class="setblock">
+     <h3>Send a message</h3><div class="sub">Pick who it goes to, write it, send. Tap a chip to drop in each player's own details.</div>
+     <div class="compose-grid">
+       <div class="field"><label>Send to</label><select id="msg_aud"><option>All players</option><option>Juniors</option><option>Futures</option><option>Challengers</option><option>ATP/WTA</option><option>Masters</option><option>A tournament group</option><option>Everyone with an unpaid entry</option><option>Everyone with an overdue match</option><option>Waitlist</option></select></div>
+       <div class="field"><label>Subject</label><input id="msg_sub" placeholder="This week's matches"></div>
+     </div>
+     <textarea id="msg_body" class="txed" rows="5">Hi {first_name}, your {tournament} group is set. Your opponents and their contacts are in My Tour. Please arrange and report your match before {deadline}. Good luck!</textarea>
+     <div class="chips" style="margin-top:8px">${['{first_name}','{tournament}','{opponents}','{deadline}','{amount}','{rankings_link}'].map(v=>`<button class="chip" onclick="insVar('${v}')">${v}</button>`).join('')}</div>
+     <button class="btn green sm" onclick="sendBroadcast()">Send message</button>
+   </div>
+   <div class="setblock">
+     <h3>Announcement banner</h3><div class="sub">A line shown across the top of the whole site. Clear it to remove.</div>
+     <div class="miniform" style="grid-template-columns:1fr auto auto"><input id="ann_text" placeholder="e.g. Summer Masters entries close Saturday!" value="${escH(S.announce||'')}"><button class="btn green sm" onclick="setAnnounce()">Show</button><button class="btn gray sm" onclick="clearAnnounce()">Clear</button></div>
+   </div>
+   <div class="setblock">
+     <h3>Automatic emails</h3><div class="sub">The routine emails the tour sends for you. Turn any of them off.</div>
+     ${Object.keys(evLabels).map(k=>`<div class="toggle-row"><div class="tinfo"><b>${evLabels[k]}</b></div><label class="sw"><input type="checkbox" ${ev[k]?'checked':''} onchange="toggleNotif('${k}',this.checked)"><span class="sl"></span></label></div>`).join('')}
+     <div class="two" style="margin-top:14px"><div class="field"><label>Sender name</label><input id="nt_sender" value="${escH(S.notif.senderName)}"></div><div class="field"><label>Reminder lead time (days before deadline)</label><input id="nt_lead" type="number" value="${S.notif.leadDays}"></div></div>
+     <button class="btn green sm" onclick="saveNotif()">Save settings</button>
+   </div>
+   <div class="setblock">
+     <h3>Sent messages</h3>
+     ${(S.sentLog||[]).length?S.sentLog.map(m=>`<div class="aud-row"><span class="at">${m.at}</span><div><b>${escH(m.sub)}</b> → ${escH(m.aud)} <span style="color:var(--muted)">(${escH(m.count)})</span></div></div>`).join(''):'<p style="font-size:13px;color:var(--muted)">No messages sent yet</p>'}
+   </div>`;
+}
+function insVar(v){const t=document.getElementById('msg_body');if(!t)return;const s=t.selectionStart||t.value.length,e=t.selectionEnd||s;t.value=t.value.slice(0,s)+v+t.value.slice(e);t.focus()}
+function audienceCount(a){const M=S.members||[];
+  if(a==='All players')return M.length;
+  if(['Juniors','Futures','Challengers','ATP/WTA','Masters'].includes(a))return M.filter(m=>m.level===a).length||Math.max(1,Math.round(M.length/5));
+  if(a.indexOf('unpaid')>=0)return payNum('unpaid').length;
+  if(a.indexOf('overdue')>=0)return S.matches.filter(m=>m.st==='arrange').length||2;
+  if(a==='Waitlist')return 3;
+  if(a.indexOf('group')>=0)return 4;
+  return M.length}
+function sendBroadcast(){const aud=document.getElementById('msg_aud').value;const sub=(document.getElementById('msg_sub').value||'(no subject)').trim();const n=audienceCount(aud);S.sentLog=S.sentLog||[];S.sentLog.unshift({at:'Just now',sub,aud,count:n+' recipients'});if(S.sentLog.length>20)S.sentLog.length=20;logAudit('Sent message "'+sub+'" to '+aud);save();renderMsg();toast('Message sent to <b>'+n+'</b> '+(n===1?'player':'players'))}
+function setAnnounce(){S.announce=(document.getElementById('ann_text').value||'').trim();save();applyContent();logAudit('Set announcement banner');toast(S.announce?'Announcement is live across the site':'Announcement cleared')}
+function clearAnnounce(){S.announce='';save();applyContent();renderMsg();toast('Announcement cleared')}
+function toggleNotif(k,on){S.notif.events[k]=on;save();toast(on?'Email turned on':'Email turned off')}
+function saveNotif(){S.notif.senderName=document.getElementById('nt_sender').value;S.notif.leadDays=parseInt(document.getElementById('nt_lead').value,10)||2;save();logAudit('Edited notification settings');toast('Notification settings saved')}
+
+/* ---- LOYALTY ---- */
+function renderLoy(){
+  const el=document.getElementById('op-loy');if(!el)return;
+  el.innerHTML=`
+   <div class="org-help">🎁 The "play more, earn more" side of the tour. Track free-entry vouchers, edit the badges and what they reward, and pick the monthly prize winner.</div>
+   <div class="setblock">
+     <h3>Free-entry vouchers</h3><div class="sub">Earned at 100 activity points. Issue one, or mark it used against an entry.</div>
+     <div style="overflow:auto"><table class="ledger"><thead><tr><th>Player</th><th>Reason</th><th>Status</th><th>Date</th><th></th></tr></thead>
+     <tbody>${(S.vouchers||[]).map((v,i)=>`<tr><td><b>${v.f||'🎾'} ${escH(v.player)}</b></td><td>${escH(v.reason)}</td><td><span class="st-pill st-${v.status==='redeemed'?'expired':v.status==='issued'?'paid':'voucher'}">${v.status}</span></td><td style="color:var(--muted)">${v.date||'—'}</td><td><div class="rowacts">${v.status==='earned'?`<button class="btn green sm" onclick="voucher(${i},'issued')">Issue</button>`:''}${v.status==='issued'?`<button class="btn line sm" onclick="voucher(${i},'redeemed')">Mark used</button>`:''}</div></td></tr>`).join('')}</tbody></table></div>
+   </div>
+   <div class="setblock">
+     <h3>Monthly prize</h3><div class="sub">The most active player this month wins. Pick the winner and the tour announces it.</div>
+     <button class="btn green sm" onclick="pickPrize()">Pick this month's winner</button>
+   </div>
+   <div class="setblock">
+     <h3>Badges</h3><div class="sub">Edit a badge's name, how it is earned, and the activity points it gives. Add your own.</div>
+     <div style="overflow:auto"><table class="ledger"><thead><tr><th></th><th>Badge</th><th>How to earn</th><th>Pts</th></tr></thead>
+     <tbody>${(S.badges||[]).map((b,i)=>`<tr><td style="font-size:20px">${b.e}</td><td><input class="txed" style="padding:6px 9px" value="${escH(b.n)}" onchange="editBadge(${i},'n',this.value)"></td><td><input class="txed" style="padding:6px 9px" value="${escH(b.req)}" onchange="editBadge(${i},'req',this.value)"></td><td><input type="number" style="width:60px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;text-align:center" value="${b.p!=null?b.p:''}" onchange="editBadge(${i},'p',this.value)"></td></tr>`).join('')}</tbody></table></div>
+     <div class="miniform" style="grid-template-columns:60px 1fr 1fr auto"><input id="bd_e" placeholder="🏅" maxlength="2"><input id="bd_n" placeholder="Badge name"><input id="bd_req" placeholder="How to earn"><button class="btn green sm" onclick="addBadge()">Add</button></div>
+     <button class="btn green sm" style="margin-top:10px" onclick="saveBadges()">Save badges</button>
+   </div>`;
+}
+function voucher(i,st){const v=S.vouchers[i];if(!v)return;v.status=st;if(st==='issued')v.date='Today';logAudit('Voucher '+st+' — '+v.player);save();renderLoy();toast(st==='issued'?'Voucher issued to <b>'+escH(v.player)+'</b>':'Voucher marked used')}
+function pickPrize(){const top=(SAMPLE_ACTIVITY[0]||{n:'Hannah Vella'});logAudit('Picked monthly prize winner — '+top.n);toast('🏆 <b>'+escH(top.n)+'</b> wins this month\'s prize · announced to the tour')}
+function editBadge(i,k,v){if(!S.badges[i])return;S.badges[i][k]=(k==='p'?(parseInt(v,10)||0):v)}
+function addBadge(){const e=(document.getElementById('bd_e').value||'🏅').trim();const n=(document.getElementById('bd_n').value||'').trim();const req=(document.getElementById('bd_req').value||'').trim();if(!n){toast('Enter a badge name');return}S.badges.push({e,n,req:req||'Custom badge',p:10});save();renderLoy();renderLeaderboard();logAudit('Added badge — '+n);toast('Badge added')}
+function saveBadges(){save();renderLeaderboard();logAudit('Edited badges');toast('Badges saved')}
+
+/* ---- CONTENT & BRAND ---- */
+function renderContent(){
+  const el=document.getElementById('op-content');if(!el)return;
+  const c=S.content;
+  el.innerHTML=`
+   <div class="org-help">🎨 Change what players read and see, with no code. Edits apply to the live site. (In the demo they apply to this preview.)</div>
+   <div class="setblock">
+     <h3>Brand</h3><div class="sub">Your name, logo and colours.</div>
+     <div class="two"><div class="field"><label>Site title</label><input id="c_title" value="${escH(c.siteTitle)}"></div><div class="field"><label>Logo (emoji)</label><input id="c_logo" value="${escH(c.logo)}" maxlength="3"></div></div>
+     <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-top:4px">
+       <label style="font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center">Deep colour <input type="color" class="swatch" id="c_olive" value="${c.brandOlive}"></label>
+       <label style="font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center">Accent green <input type="color" class="swatch" id="c_green" value="${c.brandGreen}"></label>
+     </div>
+     <button class="btn green sm" style="margin-top:12px" onclick="saveBrand()">Apply brand</button>
+   </div>
+   <div class="setblock">
+     <h3>Homepage</h3><div class="sub">The big headline and the line under it. Leave blank to keep the default.</div>
+     <div class="field"><label>Headline</label><input id="c_hero" value="${escH(c.heroTitle)}" placeholder="Connect. Compete. Conquer."></div>
+     <div class="field"><label>Sub-text</label><textarea id="c_herosub" class="txed" rows="2" placeholder="The online tennis tour...">${escH(c.heroSub)}</textarea></div>
+     <button class="btn green sm" onclick="saveHero()">Save homepage</button>
+   </div>
+   <div class="setblock">
+     <h3>Rules &amp; FAQ</h3><div class="sub">The text players read about how the tour works.</div>
+     <div class="field"><label>Rules text</label><textarea id="c_rules" class="txed" rows="4" placeholder="4 players, round robin, one match a week...">${escH(c.rules||'')}</textarea></div>
+     <button class="btn green sm" onclick="saveRules()">Save rules</button>
+   </div>
+   <div class="setblock">
+     <h3>Sponsors</h3><div class="sub">Add, remove or reorder the logos at the bottom of every page.</div>
+     <div id="spon-manage">${(S.sponsors||[]).map((s,i)=>`<div class="spon-row2"><img src="${s.img}" alt="${escH(s.n)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sponsor-name',style:'font-size:14px',textContent:this.alt}))"><div class="info"><b>${escH(s.n)}</b><span>${escH(s.url||'no link')}</span></div><button class="btn gray sm" onclick="moveSponsor(${i},-1)">↑</button><button class="btn gray sm" onclick="moveSponsor(${i},1)">↓</button><button class="btn line sm" onclick="removeSponsor(${i})">Remove</button></div>`).join('')}</div>
+     <div class="miniform"><input id="sp_n" placeholder="Sponsor name"><input id="sp_url" placeholder="https:// (optional)"><button class="btn green sm" onclick="addSponsor()">Add</button></div>
+   </div>`;
+}
+function saveBrand(){const c=S.content;c.siteTitle=document.getElementById('c_title').value||c.siteTitle;c.logo=document.getElementById('c_logo').value||'🎾';c.brandOlive=document.getElementById('c_olive').value;c.brandGreen=document.getElementById('c_green').value;save();applyContent();logAudit('Updated branding');toast('Brand applied across the site')}
+function saveHero(){S.content.heroTitle=document.getElementById('c_hero').value;S.content.heroSub=document.getElementById('c_herosub').value;save();applyContent();logAudit('Edited homepage copy');toast('Homepage updated')}
+function saveRules(){S.content.rules=document.getElementById('c_rules').value;save();logAudit('Edited rules text');toast('Rules saved')}
+function moveSponsor(i,d){const a=S.sponsors,j=i+d;if(j<0||j>=a.length)return;const tmp=a[i];a[i]=a[j];a[j]=tmp;save();renderContent();renderSponsors();logAudit('Reordered sponsors')}
+function removeSponsor(i){const s=S.sponsors[i];S.sponsors.splice(i,1);save();renderContent();renderSponsors();logAudit('Removed sponsor — '+(s&&s.n));toast('Sponsor removed')}
+function addSponsor(){const n=(document.getElementById('sp_n').value||'').trim();const url=(document.getElementById('sp_url').value||'').trim();if(!n){toast('Enter a sponsor name');return}S.sponsors.push({n,url,img:'assets/sponsors/none.png'});save();renderContent();renderSponsors();logAudit('Added sponsor — '+n);toast('Sponsor added · upload a logo any time')}
+function applyContent(){
+  const c=S.content;if(!c)return;
+  document.querySelectorAll('.brand').forEach(b=>{b.innerHTML=`<div class="logo">${escH(c.logo||'🎾')}</div> ${escH(c.siteTitle||'Tennis Online Tour')}`});
+  if(c.brandOlive)document.documentElement.style.setProperty('--olive',c.brandOlive);
+  if(c.brandGreen)document.documentElement.style.setProperty('--green',c.brandGreen);
+  const h1=document.querySelector('.hero h1');if(h1&&c.heroTitle)h1.textContent=c.heroTitle;
+  const hp=document.querySelector('.hero p');if(hp&&c.heroSub)hp.textContent=c.heroSub;
+  let bar=document.getElementById('announce-bar');
+  if(S.announce){
+    if(!bar){bar=document.createElement('div');bar.id='announce-bar';bar.style.cssText='background:var(--green);color:#fff;text-align:center;padding:9px 14px;font-size:13.5px;font-weight:600';const rib=document.querySelector('.ribbon');if(rib&&rib.parentNode)rib.parentNode.insertBefore(bar,rib.nextSibling)}
+    bar.innerHTML='📣 '+escH(S.announce);bar.style.display='block';
+  } else if(bar){bar.style.display='none'}
+}
+
+/* ---- REPORTS ---- */
+function renderReports(){
+  const el=document.getElementById('op-reports');if(!el)return;
+  const lvlCounts={Juniors:42,Futures:61,Challengers:88,'ATP/WTA':54,Masters:23};
+  const lmax=Math.max.apply(null,Object.values(lvlCounts));
+  const months={Mar:540,Apr:690,May:810,Jun:375};const mmax=Math.max.apply(null,Object.values(months));
+  el.innerHTML=`
+   <div class="org-help">📊 The season at a glance, no spreadsheet pivots. (The demo uses sample numbers; live, these come from your real data.)</div>
+   <div class="tiles">
+     <div class="tile"><div class="tn">268</div><div class="tl">Active players</div><div class="td">+18 this month</div></div>
+     <div class="tile"><div class="tn">€2,415</div><div class="tl">Revenue (season)</div></div>
+     <div class="tile"><div class="tn">81%</div><div class="tl">Fill rate</div></div>
+     <div class="tile warn"><div class="tn">6%</div><div class="tl">No-show rate</div></div>
+   </div>
+   <div class="setblock"><h3>Entries by level</h3>${Object.keys(lvlCounts).map(k=>`<div class="barrow"><span class="blbl">${k}</span><div class="bartrack"><div class="barfill" style="width:${Math.round(lvlCounts[k]/lmax*100)}%"></div></div><span class="bval">${lvlCounts[k]}</span></div>`).join('')}</div>
+   <div class="setblock"><h3>Revenue by month</h3>${Object.keys(months).map(k=>`<div class="barrow"><span class="blbl">${k}</span><div class="bartrack"><div class="barfill" style="width:${Math.round(months[k]/mmax*100)}%"></div></div><span class="bval">€${months[k]}</span></div>`).join('')}</div>
+   <div class="setblock"><h3>Players</h3>
+     <div class="barrow"><span class="blbl">New (this month)</span><div class="bartrack"><div class="barfill" style="width:24%"></div></div><span class="bval">+18</span></div>
+     <div class="barrow"><span class="blbl">Returning</span><div class="bartrack"><div class="barfill" style="width:78%"></div></div><span class="bval">186</span></div>
+     <div class="barrow"><span class="blbl">Lapsed (30d)</span><div class="bartrack"><div class="barfill" style="width:21%"></div></div><span class="bval">34</span></div>
+     <div class="barrow"><span class="blbl">Dispute rate</span><div class="bartrack"><div class="barfill" style="width:9%"></div></div><span class="bval">2%</span></div>
+   </div>
+   <div class="setblock"><h3>Busiest clubs</h3>
+     <div class="barrow"><span class="blbl">Marsa Sports Club</span><div class="bartrack"><div class="barfill" style="width:90%"></div></div><span class="bval">112</span></div>
+     <div class="barrow"><span class="blbl">Vivendo, Kalkara</span><div class="bartrack"><div class="barfill" style="width:64%"></div></div><span class="bval">79</span></div>
+     <div class="barrow"><span class="blbl">Other courts</span><div class="bartrack"><div class="barfill" style="width:40%"></div></div><span class="bval">49</span></div>
+   </div>
+   <div class="setblock"><h3>Export</h3><div class="sub">Download any of this for your records.</div>
+     <div class="prompt-acts"><button class="btn line sm" onclick="exportReport('results')">Results CSV</button><button class="btn line sm" onclick="exportReport('rankings')">Rankings CSV</button><button class="btn line sm" onclick="exportReport('payments')">Payments CSV</button></div>
+   </div>`;
+}
+function exportReport(kind){
+  let rows;
+  if(kind==='payments')rows=[['Player','Tournament','Amount','Method','Status','Date']].concat((S.payments||[]).map(p=>[p.player,p.t,p.amount,p.method,p.status,p.date]));
+  else if(kind==='rankings')rows=[['Rank','Player','Level','Points']].concat(SAMPLE_PLAYERS.slice().sort((a,b)=>b.p-a.p).map((p,i)=>[i+1,p.n,p.t,p.p]));
+  else rows=[['Tournament','Round','Winner','Loser','Score','Date']].concat(RESULTS.map(r=>[r.tour,r.round,r.p1.n,r.p2.n,r.sets.map(s=>s[0]+'-'+s[1]).join(' '),r.date]));
+  const csv=rows.map(r=>r.map(v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='tot-'+kind+'.csv';document.body.appendChild(a);a.click();a.remove();
+  toast(kind.charAt(0).toUpperCase()+kind.slice(1)+' exported');
+}
+
+/* ---- SAFETY ---- */
+function renderSafety(){
+  const el=document.getElementById('op-safety');if(!el)return;
+  el.innerHTML=`
+   <div class="org-help">🛟 Your safety net. Back up everything in one click, restore it if anything goes wrong, see every change that was made, and decide who else can help.</div>
+   <div class="setblock">
+     <h3>Backup &amp; restore</h3><div class="sub">Download one file with all your players, tournaments, results and settings. Restore it any time.</div>
+     <div class="prompt-acts"><button class="btn green sm" onclick="backupAll()">Download full backup</button><label class="btn line sm" style="cursor:pointer;margin:0">Restore from file<input type="file" accept=".json,application/json" hidden onchange="restoreAll(this)"></label></div>
+     <p class="hint" style="text-align:left;margin-top:10px">The tour also emails you an automatic backup every week.</p>
+   </div>
+   <div class="setblock">
+     <h3>People &amp; access</h3><div class="sub">Add a co-organiser or a results helper. They only see what their role allows.</div>
+     <div id="role-list">${(S.roles||[]).map((r,i)=>`<div class="role-row"><div class="info"><b>${escH(r.name)}</b><span>${escH(r.email)}</span></div><span class="role-tag">${escH(r.role)}</span>${r.role!=='Owner'?`<button class="btn gray sm" onclick="removeRole(${i})">Remove</button>`:''}</div>`).join('')}</div>
+     <div class="miniform" style="grid-template-columns:1fr 1fr auto"><input id="role_email" placeholder="email@address.com"><select id="role_kind"><option>Co-organiser</option><option>Results helper</option><option>Read-only</option></select><button class="btn green sm" onclick="addRole()">Invite</button></div>
+   </div>
+   <div class="setblock">
+     <h3>Activity log</h3><div class="sub">Every change, who made it and when. Nothing happens on your tour without a record.</div>
+     ${(S.audit||[]).map(a=>`<div class="aud-row"><span class="at">${escH(a.at)}</span><div><b>${escH(a.who)}</b> — ${escH(a.what)}</div></div>`).join('')||'<p style="font-size:13px;color:var(--muted)">No activity yet</p>'}
+   </div>`;
+}
+function backupAll(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S,null,2));a.download='tot-backup.json';document.body.appendChild(a);a.click();a.remove();logAudit('Downloaded full backup');toast('Full backup downloaded')}
+function restoreAll(input){const f=input.files&&input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const data=JSON.parse(rd.result);S=Object.assign(fresh(),data);save();applyContent();renderAll();toast('Backup restored')}catch(e){toast('Could not read that backup file')}};rd.readAsText(f);input.value=''}
+function addRole(){const email=(document.getElementById('role_email').value||'').trim();const kind=document.getElementById('role_kind').value;if(!email){toast('Enter an email');return}S.roles.push({name:email.split('@')[0],email,role:kind});save();renderSafety();logAudit('Invited '+kind+' — '+email);toast('Invite sent to <b>'+escH(email)+'</b>')}
+function removeRole(i){const r=S.roles[i];if(!r||r.role==='Owner')return;S.roles.splice(i,1);save();renderSafety();logAudit('Removed access — '+r.email);toast('Access removed')}
+
+/* ---- PUBLISH / EMBED ---- */
+function renderEmbed(){
+  const el=document.getElementById('op-embed');if(!el)return;
+  const base='https://tour.tennisonlinetour.com';
+  const snip=t=>`<iframe src="${base}/embed/${t}" width="100%" height="600" frameborder="0"></iframe>`;
+  el.innerHTML=`
+   <div class="org-help">🔗 Keep your Squarespace site and show live tour data inside it. Copy a snippet and paste it into a Squarespace "Code" block; it updates itself.</div>
+   ${[['Rankings','rankings'],['Latest results','results'],['Open tournaments','tournaments'],['Activity leaderboard','activity']].map(pair=>`<div class="setblock"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">${pair[0]}</h3><button class="btn line sm" onclick="copyEmbed('${pair[1]}')">Copy code</button></div><div class="embed-box" id="emb-${pair[1]}">${escH(snip(pair[1]))}</div></div>`).join('')}
+   <div class="setblock"><h3>Calendar &amp; downloads</h3><div class="sub">Put tournament dates and match deadlines in any calendar app, or download your data.</div>
+     <div class="prompt-acts"><button class="btn line sm" onclick="toast('Calendar link copied · add it to Google or Apple Calendar')">Copy calendar link</button><button class="btn line sm" onclick="exportReport('results')">Results CSV</button><button class="btn line sm" onclick="exportMembers()">Members CSV</button></div>
+   </div>
+   <div class="setblock"><h3>Registration poster</h3><div class="sub">A printable poster with a QR code that sends people straight to sign-up.</div>
+     <button class="btn line sm" onclick="toast('Poster PDF with a QR code generated')">Generate poster</button>
+   </div>`;
+}
+function copyEmbed(t){const node=document.getElementById('emb-'+t);const txt=node?node.textContent:'';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast('Embed code copied')},function(){toast('Embed code ready to copy')})}else{toast('Embed code ready to copy')}}
+
+function renderAll(){renderReg();renderT();renderRtabs();renderRanks();renderResults();renderLeaderboard();renderDash();renderAdmin();renderSponsors();renderOrgNav();renderOrgPanel(curOrg);applyContent()}
 renderAll();
 </script>
 </body>
