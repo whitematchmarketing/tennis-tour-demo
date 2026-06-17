@@ -413,9 +413,10 @@
         <p style="font-size:13px;color:var(--muted);margin-bottom:15px">Publish it and the round-robin groups build themselves from who enters.</p>
         <form onsubmit="createTourney(event)">
           <div class="field"><label>Name</label><input name="ct_name" required placeholder="Challengers 200" /></div>
+          <div class="field"><label>Level</label><select name="ct_level"><option>Juniors 75</option><option>Juniors 100</option><option>Futures 125</option><option>Futures 150</option><option selected>Challengers 175</option><option>Challengers 200</option><option>ATP/WTA 250</option><option>ATP/WTA 500</option><option>Masters 750</option><option>Masters 1000</option></select></div>
           <div class="two">
-            <div class="field"><label>Level</label><select name="ct_level"><option>Juniors 75</option><option>Juniors 100</option><option>Futures 125</option><option>Futures 150</option><option selected>Challengers 175</option><option>Challengers 200</option><option>ATP/WTA 250</option><option>ATP/WTA 500</option><option>Masters 750</option><option>Masters 1000</option></select></div>
             <div class="field"><label>Players</label><input name="ct_players" type="number" value="4" /></div>
+            <div class="field"><label>Entry fee (€)</label><input name="ct_fee" type="number" min="0" value="15" placeholder="15" /></div>
           </div>
           <div class="two">
             <div class="field"><label>Entry deadline</label><input name="ct_dl" type="date" /></div>
@@ -952,6 +953,7 @@ function submitReg(e){
 /* ============ tournaments ============ */
 function applyEdits(t){const e=(S.tEdits||{})[t.id];return e?{...t,...e}:t}
 function findT(id){const base=(S.created||[]).find(x=>x.id===id)||TOURNEYS.find(x=>x.id===id);return base?applyEdits(base):base}
+function feeOf(t){const f=t&&t.fee!=null?t.fee:(S.content&&S.content.fee);return f==null?15:f}
 function capOf(t){const m=(t.spots||'').match(/\/\s*(\d+)/);return m?+m[1]:4}
 function filledOf(t){const m=(t.spots||'').match(/(\d+)\s*\//);return (m?+m[1]:0)+1}
 function tcard(t){
@@ -971,7 +973,7 @@ function tcard(t){
   const top=t.status==='up'?`<span class="meta"><span>Entry deadline</span><b>${t.deadline}</b></span>`:'';
   const elig=t.status==='up'?`<div class="elig">Open to: ${eligibleLevels(lvl).join(', ')}</div>`:'';
   const foot=t.status==='up'
-    ? `<div class="foot"><span class="fee">€15 <span>entry</span></span><div style="display:flex;gap:8px;align-items:center">${action}</div></div>`
+    ? `<div class="foot"><span class="fee">${feeOf(t)>0?'€'+feeOf(t):'Free'} <span>entry</span></span><div style="display:flex;gap:8px;align-items:center">${action}</div></div>`
     : `<div class="foot"><span class="meta" style="margin:0">${t.note||'Completed'}</span>${action}</div>`;
   return `<div class="card tcard ${t.flash?'isflash':''}"><div class="top ${topClass(lvl)}"><span class="tier">${t.flash?'⚡ ':''}${t.name}</span>
     <span class="pill ${t.flash?'flash':t.status}">${t.flash?'Flash':t.status==='up'?'Open':t.status==='on'?'Live':'Finished'}</span></div>
@@ -1009,9 +1011,9 @@ function openEntry(id){
       <div class="kv"><span>Schedule</span><b>${t.flash?'Single match, play by '+t.start:'1 match per week'}</b></div>
       <div class="kv"><span>${t.flash?'Play by':'Starts'}</span><b>${t.start}</b></div>
       <div class="kv"><span>Entry deadline</span><b>${t.deadline}</b></div>
-      <div class="kv"><span>Entry fee</span><b>€15 (Revolut / BOV)</b></div>
+      <div class="kv"><span>Entry fee</span><b>${feeOf(t)>0?'€'+feeOf(t)+' (Revolut / BOV)':'Free'}</b></div>
       <div class="kv"><span>Your level</span><b>${S.profile.level} ${ok?'✓ eligible':'⚠ outside range'}</b></div>
-      <p class="hint">${ok?(S.requireApproval?'You pay €15 to the organiser, who approves your entry. Then your group and opponents’ contacts appear in My Tour.':'Your group and opponents’ contacts appear in My Tour once you enter.'):'This event is normally for '+eligibleLevels(lvl).join(', ')+'. You can still try it in the demo.'}</p>
+      <p class="hint">${ok?(S.requireApproval?(feeOf(t)>0?'You pay €'+feeOf(t)+' to the organiser, who approves your entry.':'This event is free; the organiser approves your entry.')+' Then your group and opponents’ contacts appear in My Tour.':'Your group and opponents’ contacts appear in My Tour once you enter.'):'This event is normally for '+eligibleLevels(lvl).join(', ')+'. You can still try it in the demo.'}</p>
     </div>
     <div class="mf"><button class="btn line sm" onclick="closeModal()">Cancel</button>
     <button class="btn green sm" onclick="doEnter('${t.id}')">Confirm entry</button></div>`);
@@ -1029,6 +1031,11 @@ function doEnter(id){
       const o=OPPONENTS[(off+r)%OPPONENTS.length];
       S.matches.push({tid:id,tname:t.name,round:r+1,opp:o.n,f:o.f,email:o.email,phone:o.phone,st:"arrange",score:"",won:false,flash:!!t.flash});
     }
+    S.payments=S.payments||[];
+    if(!S.payments.some(p=>p.ref===id)){
+      const ff=feeOf(t);
+      S.payments.unshift({player:meName(),f:S.profile?FLAG[S.profile.country]:'🎾',t:t.name,amount:ff,method:'',status:ff>0?'unpaid':'waived',date:'',note:'just entered',ref:id});
+    }
     save();
   }
   closeModal();renderAll();
@@ -1042,6 +1049,7 @@ function withdraw(id){
   S.matches=S.matches.filter(m=>m.tid!==id);
   if(S.entryStatus)delete S.entryStatus[id];
   if(S.drawn)delete S.drawn[id];
+  S.payments=(S.payments||[]).filter(p=>p.ref!==id);
   save();renderAll();toast('Withdrawn from tournament');
 }
 
@@ -1201,7 +1209,7 @@ function tourCard(id){
   const head=`<div class="ttour-head">
       <div>
         <div class="ttour-name">${isFlash?'⚡ ':''}${t.name} <span class="lvltag">${LEVEL_LABEL[lvl]}</span>${status==='pending'?' <span class="lvltag pend">Pending approval</span>':''}</div>
-        <div class="ttour-dates">${t.start}${t.end?' - '+t.end:''} &middot; ${isFlash?'Flash match, single 1 v 1':'4-player round robin'} &middot; ${status==='pending'?'€15 due':'€15 paid &middot; '+done+'/'+total+' result'+(total>1?'s':'')+' in'}</div>
+        <div class="ttour-dates">${t.start}${t.end?' - '+t.end:''} &middot; ${isFlash?'Flash match, single 1 v 1':'4-player round robin'} &middot; ${status==='pending'?(feeOf(t)>0?'€'+feeOf(t)+' due':'Free entry'):(feeOf(t)>0?'€'+feeOf(t)+' paid':'Free')+' &middot; '+done+'/'+total+' result'+(total>1?'s':'')+' in'}</div>
       </div>
       <button class="btn gray sm" onclick="withdraw('${id}')">Withdraw</button>
     </div>`;
@@ -1209,7 +1217,7 @@ function tourCard(id){
     return `<div class="card ttour">${head}
       <div class="pendbox">
         <div class="pendbox-h">⏳ Waiting for the organiser to approve your entry</div>
-        <p>Pay the €15 entry to the organiser by Revolut or BOV Mobile (+356 79335554). As soon as they confirm your payment and approve you, your round-robin group and your opponents’ contact details appear right here. <a class="demolink" onclick="approveEntry('${id}')">demo: organiser confirms payment and approves</a></p>
+        <p>${feeOf(t)>0?'Pay the €'+feeOf(t)+' entry to the organiser by Revolut or BOV Mobile (+356 79335554). As soon as they confirm your payment and approve you, ':'As soon as the organiser approves you, '}your round-robin group and your opponents’ contact details appear right here. <a class="demolink" onclick="approveEntry('${id}')">demo: organiser ${feeOf(t)>0?'confirms payment and ':''}approves</a></p>
       </div>
     </div>`;
   }
@@ -1333,7 +1341,7 @@ function opponentView(i){
 /* ============ organiser ============ */
 let pendingRegs=[{n:"Chris Camilleri",f:"🇲🇹",info:"Challengers"},{n:"Aurora Bianchi",f:"🇮🇹",info:"Juniors"},{n:"Tom Becker",f:"🇩🇪",info:"Futures"}];
 let pendingEntries=[{n:"Marco Borg",f:"🇲🇹",t:"Challengers 200"},{n:"Lena Fischer",f:"🇩🇪",t:"Juniors 75"}];
-function approveEntry(id){S.entryStatus=S.entryStatus||{};S.entryStatus[id]='approved';save();renderAll();toast('Entry approved &middot; player notified with their group and contacts')}
+function approveEntry(id){S.entryStatus=S.entryStatus||{};S.entryStatus[id]='approved';const pr=(S.payments||[]).find(p=>p.ref===id);if(pr&&pr.status==='unpaid'){pr.status='paid';pr.method=pr.method||'Revolut'}save();renderAll();toast('Entry approved &middot; player notified with their group and contacts')}
 function approveSampleEntry(n){pendingEntries=pendingEntries.filter(e=>e.n.replace(/'/g,'')!==n);renderAdmin();toast('Entry approved &middot; player notified')}
 function toggleApproval(on){S.requireApproval=on;save();renderAll();toast(on?'New entries now need your approval':'New entries are auto-approved')}
 let sampleResults=[
@@ -1363,14 +1371,16 @@ function renderAdmin(){
   // manage tournaments (reschedule)
   const manage=[...(S.created||[]),...TOURNEYS].map(applyEdits).filter(t=>t.status==='up'||t.status==='on');
   const mEl=document.getElementById('adm-manage');
-  if(mEl)mEl.innerHTML=manage.map(t=>`<div class="listrow"><div class="info"><b>${t.name}</b><span>${t.status==='up'?'Opens '+t.start+' &middot; entry '+(t.deadline||'TBC'):'In progress &middot; '+t.start+' - '+t.end}</span></div><button class="btn line sm" onclick="openEditTournament('${t.id}')">Edit dates</button></div>`).join('');
+  if(mEl)mEl.innerHTML=manage.map(t=>`<div class="listrow"><div class="info"><b>${t.name}</b><span>${t.status==='up'?'Opens '+t.start+' &middot; entry '+(t.deadline||'TBC'):'In progress &middot; '+t.start+' - '+t.end} &middot; ${feeOf(t)>0?'€'+feeOf(t)+' entry':'Free'}</span></div><button class="btn line sm" onclick="openEditTournament('${t.id}')">Edit</button></div>`).join('');
   // tournament entries pending approval (player's own pending + samples)
   const myPending=(S.entries||[]).filter(id=>(S.entryStatus||{})[id]==='pending').map(id=>({n:meName(),f:S.profile?FLAG[S.profile.country]:'🎾',t:(findT(id)||{}).name||'',ref:id,you:true}));
   const ents=[...myPending,...pendingEntries];
-  document.getElementById('adm-entries').innerHTML=ents.map(en=>`
+  document.getElementById('adm-entries').innerHTML=ents.map(en=>{
+    const ef=en.ref!=null?feeOf(findT(en.ref)):(S.content.fee||15);
+    return `
     <div class="listrow ${en.you?'mine':''}"><span class="flag" style="font-size:20px">${en.f}</span>
-      <div class="info"><b>${en.n}</b><span>${en.t} &middot; €15 ${en.you?'due':'unpaid'}${en.you?' &middot; just entered':''}</span></div>
-      <button class="btn green sm" onclick="${en.ref!=null?`approveEntry('${en.ref}')`:`approveSampleEntry('${en.n.replace(/'/g,'')}')`}">Approve</button></div>`).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No entries waiting</p>';
+      <div class="info"><b>${en.n}</b><span>${en.t} &middot; ${ef>0?'€'+ef:'Free'} ${en.you?'due':'unpaid'}${en.you?' &middot; just entered':''}</span></div>
+      <button class="btn green sm" onclick="${en.ref!=null?`approveEntry('${en.ref}')`:`approveSampleEntry('${en.n.replace(/'/g,'')}')`}">Approve</button></div>`;}).join('')||'<p style="font-size:13px;color:var(--muted);padding:8px 0">No entries waiting</p>';
   document.getElementById('ent-count').textContent=ents.length+' pending';
   const at=document.getElementById('approvalToggle'); if(at)at.checked=!!S.requireApproval;
   const myReg=(S.profile&&!S.regApproved)?`<div class="listrow mine"><span class="flag" style="font-size:20px">${FLAG[S.profile.country]}</span><div class="info"><b>${meName()}</b><span>wants ${S.profile.level} &middot; just registered</span></div><button class="btn green sm" onclick="approveMyReg()">Approve</button></div>`:'';
@@ -1437,24 +1447,26 @@ function createTourney(e){
   const f=e.target, lvlSel=f.ct_level.value;
   const name=(f.ct_name.value||'').trim()||lvlSel;
   const players=parseInt(f.ct_players.value,10)||4;
+  const fee=f.ct_fee&&f.ct_fee.value!==''?Math.max(0,parseInt(f.ct_fee.value,10)||0):(S.content.fee||15);
   const created=S.created||(S.created=[]);
-  const t={id:'c'+(created.length+1),name,lvl:levelOf(lvlSel),num:numOf(lvlSel),
+  const t={id:'c'+(created.length+1),name,lvl:levelOf(lvlSel),num:numOf(lvlSel),fee,
     status:'up',deadline:fmtDate(f.ct_dl.value)||'TBC',start:fmtDate(f.ct_start.value)||'TBC',end:'',spots:'0 / '+players};
   created.unshift(t); save();
   f.reset(); renderAll(); go('tournaments');
-  toast(`<b>${t.name}</b> published &middot; now open for entry`);
+  toast(`<b>${t.name}</b> published &middot; ${fee>0?'€'+fee+' entry':'free entry'} &middot; now open`);
 }
 function fmtDate(iso){if(!iso)return '';const d=new Date(iso+'T00:00');if(isNaN(d.getTime()))return '';const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]}
 function openEditTournament(id){
   const t=findT(id); if(!t)return;
   openModal(`<div class="mh"><h3>Edit ${t.name}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
-      <p style="font-size:13px;color:var(--muted);margin:0 0 12px">Reschedule this tournament: push the start if it has not filled, or set the real dates once all 4 players are in. Players are notified of the new schedule.</p>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 12px">Reschedule or reprice this tournament: push the start if it has not filled, set the real dates once all 4 players are in, or change the entry fee for this event. Players are notified of any change.</p>
       ${t.status==='up'?`<div class="field"><label>Entry deadline</label><input id="et_dl" value="${t.deadline||''}" placeholder="e.g. Sat 13 Jun" /></div>`:''}
       <div class="two">
         <div class="field"><label>Start date</label><input id="et_start" value="${t.start||''}" placeholder="e.g. 15 Jun" /></div>
         <div class="field"><label>End date</label><input id="et_end" value="${t.end||''}" placeholder="e.g. 05 Jul" /></div>
       </div>
+      <div class="field"><label>Entry fee (€) <span style="font-weight:400;color:var(--muted)">— 0 for a free event</span></label><input id="et_fee" type="number" min="0" value="${feeOf(t)}" style="max-width:140px" /></div>
       <div class="field"><label>Status</label><select id="et_status">
         <option value="up" ${t.status==='up'?'selected':''}>Open for entry</option>
         <option value="on" ${t.status==='on'?'selected':''}>In progress</option>
@@ -1470,8 +1482,9 @@ function saveEditTournament(id){
   e.start=document.getElementById('et_start').value.trim();
   e.end=document.getElementById('et_end').value.trim();
   e.status=document.getElementById('et_status').value;
+  const fe=document.getElementById('et_fee'); if(fe&&fe.value!=='')e.fee=Math.max(0,parseInt(fe.value,10)||0);
   S.tEdits[id]=e; save(); closeModal(); renderAll();
-  toast('Dates updated &middot; players notified of the new schedule');
+  toast('Tournament updated &middot; players notified of any changes');
 }
 
 /* ============ modal + toast ============ */
